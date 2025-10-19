@@ -118,6 +118,8 @@ type Line {
 	nameKatakana: String
 	nameFull: String
 	nameRoman: String
+	nameChinese: String
+	nameKorean: String
 	color: String
 	lineType: LineType
 	lineSymbols: [LineSymbol!]
