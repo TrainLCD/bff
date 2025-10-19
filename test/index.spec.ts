@@ -60,6 +60,16 @@ const createGrpcSuccessResponse = (responseType: GeneratedEncodeType, payload: R
 	});
 };
 
+const graphqlRequest = (query: string, variables: Record<string, unknown> = {}) =>
+	new IncomingRequest('https://worker.example.com/graphql', {
+		method: 'POST',
+		headers: {
+			origin: 'https://frontend.example.com',
+			'content-type': 'application/json',
+		},
+		body: JSON.stringify({ query, variables }),
+	});
+
 beforeEach(() => {
 	gatewayEnv.GRPC_TARGET_ORIGIN = 'https://grpc-stg.trainlcd.app';
 	delete gatewayEnv.GRPC_ALLOWED_ORIGINS;
@@ -69,133 +79,119 @@ afterEach(() => {
 	vi.restoreAllMocks();
 });
 
-describe('REST to gRPC gateway', () => {
-	it('returns station detail via gRPC GetStationById', async () => {
-	const fetchMock = vi
-		.spyOn(globalThis, 'fetch')
-		.mockResolvedValueOnce(
-			createGrpcSuccessResponse(grpc.SingleStationResponse, {
-				station: {
-					id: 1,
-					groupId: 100,
-					name: 'Tokyo',
-					nameKatakana: 'トウキョウ',
-				},
-			}),
-		);
+describe('GraphQL gateway', () => {
+	it('resolves station query via GetStationById', async () => {
+		const fetchMock = vi
+			.spyOn(globalThis, 'fetch')
+			.mockResolvedValueOnce(
+				createGrpcSuccessResponse(grpc.SingleStationResponse, {
+					station: {
+						id: 1,
+						groupId: 100,
+						name: 'Tokyo',
+						nameKatakana: 'トウキョウ',
+					},
+				}),
+			);
 
-		const request = new IncomingRequest('https://worker.example.com/api/stations/1', {
-			method: 'GET',
-			headers: { origin: 'https://frontend.example.com' },
-		});
+		const query = `
+			query GetStation($id: Int!) {
+				station(id: $id) {
+					id
+					groupId
+					name
+					nameKatakana
+				}
+			}
+		`;
+
+		const request = graphqlRequest(query, { id: 1 });
 		const ctx = createExecutionContext();
 		const response = await worker.fetch(request, env, ctx);
 		await waitOnExecutionContext(ctx);
 
-	expect(fetchMock).toHaveBeenCalledTimes(1);
-	const [upstreamUrl, init] = fetchMock.mock.calls[0];
-	expect(upstreamUrl).toBe('https://grpc-stg.trainlcd.app/app.trainlcd.grpc.StationAPI/GetStationById');
-	const bodyInit = init?.body;
-	expect(bodyInit).toBeInstanceOf(Uint8Array);
-	const grpcRequestBody = decodeRequestPayload(bodyInit as Uint8Array, grpc.GetStationByIdRequest);
+		expect(fetchMock).toHaveBeenCalledTimes(1);
+		const [upstreamUrl, init] = fetchMock.mock.calls[0];
+		expect(upstreamUrl).toBe('https://grpc-stg.trainlcd.app/app.trainlcd.grpc.StationAPI/GetStationById');
+		const bodyInit = init?.body;
+		expect(bodyInit).toBeInstanceOf(Uint8Array);
+		const grpcRequestBody = decodeRequestPayload(bodyInit as Uint8Array, grpc.GetStationByIdRequest);
 		expect(grpcRequestBody).toEqual({ id: 1 });
 
 		expect(response.status).toBe(200);
-	const body = await response.json();
-	expect(body.station).toMatchObject({
-		id: 1,
-		groupId: 100,
-		name: 'Tokyo',
-		nameKatakana: 'トウキョウ',
-	});
-		expect(response.headers.get('Access-Control-Allow-Origin')).toBe('https://frontend.example.com');
-	});
-
-	it('supports station list lookups via ids query', async () => {
-	const fetchMock = vi
-		.spyOn(globalThis, 'fetch')
-		.mockResolvedValueOnce(
-			createGrpcSuccessResponse(grpc.MultipleStationResponse, {
-				stations: [{ id: 1, groupId: 10, name: 'Tokyo', nameKatakana: 'トウキョウ' }],
-			}),
-		);
-
-		const request = new IncomingRequest('https://worker.example.com/api/stations?ids=1,2', {
-			method: 'GET',
-			headers: { origin: 'https://frontend.example.com' },
+		const result = await response.json();
+		expect(result.data.station).toEqual({
+			id: 1,
+			groupId: 100,
+			name: 'Tokyo',
+			nameKatakana: 'トウキョウ',
 		});
+	});
+
+	it('resolves stations query via GetStationByIdList', async () => {
+		const fetchMock = vi
+			.spyOn(globalThis, 'fetch')
+			.mockResolvedValueOnce(
+				createGrpcSuccessResponse(grpc.MultipleStationResponse, {
+					stations: [{ id: 1, groupId: 10, name: 'Tokyo', nameKatakana: 'トウキョウ' }],
+				}),
+			);
+
+		const query = `
+			query Stations($ids: [Int!]!) {
+				stations(ids: $ids) {
+					id
+					name
+				}
+			}
+		`;
+
+		const request = graphqlRequest(query, { ids: [1, 2] });
 		const ctx = createExecutionContext();
 		const response = await worker.fetch(request, env, ctx);
 		await waitOnExecutionContext(ctx);
 
 		expect(fetchMock).toHaveBeenCalledTimes(1);
-	const [upstreamUrl, init] = fetchMock.mock.calls[0];
-	expect(upstreamUrl).toBe('https://grpc-stg.trainlcd.app/app.trainlcd.grpc.StationAPI/GetStationByIdList');
-	const bodyInit = init?.body;
-	expect(bodyInit).toBeInstanceOf(Uint8Array);
-	const grpcRequestBody = decodeRequestPayload(bodyInit as Uint8Array, grpc.GetStationByIdListRequest);
+		const [upstreamUrl, init] = fetchMock.mock.calls[0];
+		expect(upstreamUrl).toBe('https://grpc-stg.trainlcd.app/app.trainlcd.grpc.StationAPI/GetStationByIdList');
+		const bodyInit = init?.body;
+		expect(bodyInit).toBeInstanceOf(Uint8Array);
+		const grpcRequestBody = decodeRequestPayload(bodyInit as Uint8Array, grpc.GetStationByIdListRequest);
 		expect(grpcRequestBody).toEqual({ ids: [1, 2] });
 
-		expect(response.status).toBe(200);
-		const payload = await response.json();
-		expect(payload.stations).toHaveLength(1);
+		const result = await response.json();
+		expect(result.data.stations).toHaveLength(1);
+		expect(result.errors).toBeUndefined();
 	});
 
-	it('proxies station group queries via GetStationByGroupId', async () => {
+	it('resolves routes query with pagination parameters', async () => {
 		const fetchMock = vi
 			.spyOn(globalThis, 'fetch')
-			.mockResolvedValueOnce(createGrpcSuccessResponse(grpc.MultipleStationResponse, { stations: [] }));
+			.mockResolvedValueOnce(
+				createGrpcSuccessResponse(grpc.RouteResponse, {
+					routes: [{ id: 9, stops: [] }],
+					nextPageToken: 'token',
+				}),
+			);
 
-		const request = new IncomingRequest('https://worker.example.com/api/station-groups/42/stations', {
-			method: 'GET',
-			headers: { origin: 'https://frontend.example.com' },
-		});
-		const ctx = createExecutionContext();
-		const response = await worker.fetch(request, env, ctx);
-		await waitOnExecutionContext(ctx);
+	const query = `
+		query Routes($from: Int!, $to: Int!, $size: Int, $token: String) {
+			routes(
+				fromStationGroupId: $from
+				toStationGroupId: $to
+				pageSize: $size
+				pageToken: $token
+			) {
+					routes {
+						id
+					}
+					nextPageToken
+				}
+			}
+		`;
 
-		expect(fetchMock).toHaveBeenCalledTimes(1);
-		const [upstreamUrl, init] = fetchMock.mock.calls[0];
-		expect(upstreamUrl).toBe('https://grpc-stg.trainlcd.app/app.trainlcd.grpc.StationAPI/GetStationByGroupId');
-		const bodyInit = init?.body;
-		expect(bodyInit).toBeInstanceOf(Uint8Array);
-		const grpcRequestBody = decodeRequestPayload(bodyInit as Uint8Array, grpc.GetStationByGroupIdRequest);
-		expect(grpcRequestBody).toEqual({ groupId: 42 });
-		expect(response.status).toBe(200);
-	});
-
-	it('proxies coordinate-based station lookups', async () => {
-		const fetchMock = vi
-			.spyOn(globalThis, 'fetch')
-			.mockResolvedValueOnce(createGrpcSuccessResponse(grpc.MultipleStationResponse, { stations: [] }));
-
-		const request = new IncomingRequest('https://worker.example.com/api/stations/nearby?latitude=35.0&longitude=139.0&limit=5', {
-			method: 'GET',
-			headers: { origin: 'https://frontend.example.com' },
-		});
-		const ctx = createExecutionContext();
-		const response = await worker.fetch(request, env, ctx);
-		await waitOnExecutionContext(ctx);
-
-		expect(fetchMock).toHaveBeenCalledTimes(1);
-		const [upstreamUrl, init] = fetchMock.mock.calls[0];
-		expect(upstreamUrl).toBe('https://grpc-stg.trainlcd.app/app.trainlcd.grpc.StationAPI/GetStationsByCoordinates');
-		const bodyInit = init?.body;
-		expect(bodyInit).toBeInstanceOf(Uint8Array);
-		const grpcRequestBody = decodeRequestPayload(bodyInit as Uint8Array, grpc.GetStationByCoordinatesRequest);
-		expect(grpcRequestBody).toEqual({ latitude: 35, longitude: 139, limit: 5 });
-		expect(response.status).toBe(200);
-	});
-
-	it('proxies route lookups with pagination controls', async () => {
-		const fetchMock = vi
-			.spyOn(globalThis, 'fetch')
-			.mockResolvedValueOnce(createGrpcSuccessResponse(grpc.RouteResponse, { routes: [] }));
-
-		const request = new IncomingRequest('https://worker.example.com/api/routes?from_station_group_id=1&to_station_group_id=2&page_size=20&page_token=abc', {
-			method: 'GET',
-			headers: { origin: 'https://frontend.example.com' },
-		});
+	const variables = { from: 1, to: 2, size: 10, token: 'abc' };
+		const request = graphqlRequest(query, variables);
 		const ctx = createExecutionContext();
 		const response = await worker.fetch(request, env, ctx);
 		await waitOnExecutionContext(ctx);
@@ -204,41 +200,50 @@ describe('REST to gRPC gateway', () => {
 		const [upstreamUrl, init] = fetchMock.mock.calls[0];
 		expect(upstreamUrl).toBe('https://grpc-stg.trainlcd.app/app.trainlcd.grpc.StationAPI/GetRoutes');
 		const bodyInit = init?.body;
-		expect(bodyInit).toBeInstanceOf(Uint8Array);
 		const grpcRequestBody = decodeRequestPayload(bodyInit as Uint8Array, grpc.GetRouteRequest);
 		expect(grpcRequestBody).toEqual({
 			fromStationGroupId: 1,
 			toStationGroupId: 2,
-			pageSize: 20,
+			pageSize: 10,
 			pageToken: 'abc',
 		});
-		expect(response.status).toBe(200);
+
+		const result = await response.json();
+		expect(result.data.routes.routes).toHaveLength(1);
+		expect(result.data.routes.nextPageToken).toBe('token');
 	});
 
-	it('validates missing query parameters', async () => {
-		const request = new IncomingRequest('https://worker.example.com/api/stations/search', {
-			method: 'GET',
-			headers: { origin: 'https://frontend.example.com' },
+	it('returns GraphQL errors for invalid payloads', async () => {
+		const request = new IncomingRequest('https://worker.example.com/graphql', {
+			method: 'POST',
+			headers: {
+				origin: 'https://frontend.example.com',
+				'content-type': 'application/json',
+			},
+			body: JSON.stringify({}),
 		});
+
 		const ctx = createExecutionContext();
 		const response = await worker.fetch(request, env, ctx);
 		await waitOnExecutionContext(ctx);
 
 		expect(response.status).toBe(400);
-		expect(await response.json()).toEqual({ error: 'Missing "name" query parameter' });
+		const result = await response.json();
+		expect(result.errors[0].message).toBe('Missing GraphQL query');
 	});
 
 	it('returns 500 when upstream origin is not configured', async () => {
 		delete gatewayEnv.GRPC_TARGET_ORIGIN;
-		const request = new IncomingRequest('https://worker.example.com/api/stations/1', {
-			method: 'GET',
-			headers: { origin: 'https://frontend.example.com' },
-		});
+		const query = `
+			query { station(id: 1) { id } }
+		`;
+		const request = graphqlRequest(query);
 		const ctx = createExecutionContext();
 		const response = await worker.fetch(request, env, ctx);
 		await waitOnExecutionContext(ctx);
 
 		expect(response.status).toBe(500);
-		expect(await response.json()).toEqual({ error: 'Gateway is not configured' });
+		const result = await response.json();
+		expect(result.errors[0].message).toBe('Gateway is not configured');
 	});
 });

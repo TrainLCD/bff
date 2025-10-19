@@ -1,8 +1,8 @@
 # Repository Guidelines
 
 ## Project Structure & Module Organization
-- Keep `src/index.ts` minimal; delegate logic to helper modules such as `src/restGateway.ts`.
-- Implement new REST routes or gRPC-Web integrations in composable utilities under `src/` beside `restGateway.ts`.
+- Keep `src/index.ts` minimal; delegate logic to helper modules such as `src/graphqlGateway.ts`.
+- Implement new GraphQL fields or gRPC-Web integrations in composable utilities under `src/` beside `graphqlGateway.ts`.
 - Store protobuf assets under `proto/` and regenerate static modules in `src/generated/` when the schema changes.
 - Store shared tests in `/test` next to `index.spec.ts` and `env.d.ts`; add suites beside existing files for discoverability.
 - Runtime configuration lives in `wrangler.jsonc`, while type generation flows through `worker-configuration.d.ts`. Application code compiles via `tsconfig.json`; tests use `test/tsconfig.json`.
@@ -26,7 +26,7 @@
 
 ## Testing Guidelines
 - Rely on Vitest with `@cloudflare/vitest-pool-workers`, using `SELF.fetch` and `createExecutionContext()` for realistic execution.
-- Group specs by observable behaviour (REST routing, gRPC-Web happy paths, validation failures) and cover both success and failure cases.
+- Group specs by observable behaviour (GraphQL resolvers, gRPC-Web happy paths, validation failures) and cover both success and failure cases.
 - When adding asynchronous side work, wait for `ctx.waitUntil()` by calling `waitOnExecutionContext`.
 - Refresh inline snapshots via `npm run test -- --update` and review the resulting diffs before committing.
 

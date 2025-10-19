@@ -1,6 +1,6 @@
 # sapi-bff
 
-Cloudflare Workers-based backend-for-frontend (BFF) that exposes REST endpoints and bridges them to the upstream gRPC-Web service defined by `GRPC_TARGET_ORIGIN`. Requests are validated, transformed into protobuf payloads generated from `proto/stationapi.proto`, and dispatched over gRPC-Web, while responses are decoded and returned as JSON. Development, testing, and deployment rely on Wrangler v4 and Vitest.
+Cloudflare Workers-based backend-for-frontend (BFF) that exposes a GraphQL API backed by the upstream gRPC-Web service defined by `GRPC_TARGET_ORIGIN`. GraphQL resolvers translate queries into protobuf payloads generated from `proto/stationapi.proto`, forward them via gRPC-Web, and map responses back into the GraphQL schema. Development, testing, and deployment rely on Wrangler v4 and Vitest.
 
 ## Prerequisites
 - Node.js 18 or later
@@ -27,28 +27,47 @@ npm run dev
 - Runs `wrangler dev` and exposes the worker at `http://localhost:8787/`.
 - The `compatibility_date` is `2025-10-11`; update it when adopting newer runtime capabilities.
 
-## REST Endpoints (initial draft)
-- `GET /api/stations/:id` → `GetStationById`
-- `GET /api/stations?ids=1,2,3` → `GetStationByIdList`
-- `GET /api/stations/nearby?latitude=<lat>&longitude=<lon>&limit=<n>` → `GetStationsByCoordinates`
-- `GET /api/stations/search?name=<text>&limit=<n>&from_station_group_id=<id>` → `GetStationsByName`
-- `GET /api/station-groups/{groupId}/stations` → `GetStationByGroupId`
-- `GET /api/line-groups/{lineGroupId}/stations` → `GetStationsByLineGroupId`
-- `GET /api/lines/{lineId}/stations?station_id=<id>` → `GetStationsByLineId`
-- `GET /api/stations/{stationId}/train-types` → `GetTrainTypesByStationId`
-- `GET /api/lines/:id` → `GetLineById`
-- `GET /api/lines/search?name=<text>&limit=<n>` → `GetLinesByName`
-- `GET /api/routes?from_station_group_id=<id>&to_station_group_id=<id>&page_size=<n>&page_token=<token>` → `GetRoutes`
-- `GET /api/route-types?from_station_group_id=<id>&to_station_group_id=<id>&page_size=<n>&page_token=<token>` → `GetRouteTypes`
-- `GET /api/routes/connected?from_station_group_id=<id>&to_station_group_id=<id>` → `GetConnectedRoutes`
+## GraphQL Endpoint
+- GraphQL endpoint is exposed at `POST /graphql`.
+- The runtime schema is declared in `schema.graphql` and mirrored in `src/graphqlGateway.ts`.
+- Supported queries include:
+  - `station(id: Int!)`
+  - `stations(ids: [Int!]!)`
+  - `stationsNearby(latitude: Float!, longitude: Float!, limit: Int)`
+  - `stationsByName(name: String!, limit: Int, fromStationGroupId: Int)`
+  - `stationGroupStations(groupId: Int!)`
+  - `lineGroupStations(lineGroupId: Int!)`
+  - `line(lineId: Int!)`
+  - `linesByName(name: String!, limit: Int)`
+  - `lineStations(lineId: Int!, stationId: Int)`
+  - `stationTrainTypes(stationId: Int!)`
+  - `routes(fromStationGroupId: Int!, toStationGroupId: Int!, pageSize: Int, pageToken: String)`
+  - `routeTypes(fromStationGroupId: Int!, toStationGroupId: Int!, pageSize: Int, pageToken: String)`
+  - `connectedRoutes(fromStationGroupId: Int!, toStationGroupId: Int!)`
 
-Additional gRPC methods can be surfaced by extending the router in `src/restGateway.ts` with the desired field mapping.
+Customize or extend the schema by editing `schema.graphql` and updating the resolvers in `src/graphqlGateway.ts`.
+
+### Example Query
+```graphql
+query Example($from: Int!, $to: Int!) {
+  routes(fromStationGroupId: $from, toStationGroupId: $to, pageSize: 10) {
+    routes {
+      id
+      stops {
+        id
+        name
+      }
+    }
+    nextPageToken
+  }
+}
+```
 
 ## Testing
 ```bash
 npm test
 ```
-- Uses `cloudflare/test` and `@cloudflare/vitest-pool-workers` to exercise the Worker in a production-like environment, including gRPC-Web framing, CORS handling, and configuration failures.
+- Uses `cloudflare/test` and `@cloudflare/vitest-pool-workers` to exercise the Worker in a production-like environment, including gRPC-Web framing, CORS handling, and GraphQL execution.
 
 ## Deployment
 ```bash
@@ -68,14 +87,15 @@ npm run cf-typegen
 npm run proto:generate
 ```
 - Compiles `proto/stationapi.proto` to `src/generated/stationapi.js` and `src/generated/stationapi.d.ts` using `protobufjs`.
-- Re-run tests afterwards to ensure the REST–gRPC translations still behave as expected.
+- Re-run tests afterwards to ensure the GraphQL↔gRPC translations still behave as expected.
 
 ## Directory Highlights
-- `src/index.ts` — Worker entry point delegating requests to the REST→gRPC gateway.
-- `src/restGateway.ts` — REST router, CORS handling, and gRPC-Web invocation helpers.
+- `src/index.ts` — Worker entry point delegating requests to the GraphQL gateway.
+- `src/graphqlGateway.ts` — GraphQL schema/resolver wiring, CORS handling, and gRPC-Web invocation helpers.
 - `src/generated/stationapi.js` — ProtobufJS static module generated from `proto/stationapi.proto`.
 - `proto/stationapi.proto` — Source protocol buffer definitions for the upstream service.
-- `test/index.spec.ts` — Vitest suite covering REST routing and gRPC-Web interactions.
+- `schema.graphql` — SDL representation of the public GraphQL schema.
+- `test/index.spec.ts` — Vitest suite covering GraphQL queries and gRPC-Web interactions.
 - `vitest.config.mts` — Vitest configuration targeting the Workers pool.
 - `wrangler.jsonc` — Worker metadata, compatibility date, and development/deployment settings.
 

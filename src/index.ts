@@ -1,11 +1,11 @@
 /**
- * Cloudflare Workers entry point exposing REST endpoints backed by gRPC-Web upstream calls.
+ * Cloudflare Workers entry point exposing a GraphQL API backed by gRPC-Web upstream calls.
  */
 
-import { handleRestGatewayRequest } from './restGateway';
+import { handleGraphQLRequest } from './graphqlGateway';
 
 export default {
 	async fetch(request, env, _ctx): Promise<Response> {
-		return handleRestGatewayRequest(request, env);
+		return handleGraphQLRequest(request, env);
 	},
 } satisfies ExportedHandler<Env>;
