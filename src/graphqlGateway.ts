@@ -11,6 +11,10 @@ const GATEWAY_USER_AGENT = 'sapi-bff-graphql-gateway/0.1';
 // Enum mappings
 const LineType = grpcTypes.LineType;
 const TrainTypeKind = grpcTypes.TrainTypeKind;
+const OperationStatus = grpcTypes.OperationStatus;
+const StopCondition = grpcTypes.StopCondition;
+const CompanyType = grpcTypes.CompanyType;
+const TrainDirection = grpcTypes.TrainDirection;
 
 type GatewayEnv = Env & {
 	GRPC_TARGET_ORIGIN?: string;
@@ -432,16 +436,32 @@ function convertEnumsToNames(obj: any): any {
 	if (typeof obj === 'object') {
 		const converted: any = {};
 		for (const [key, value] of Object.entries(obj)) {
-			// Convert lineType enum
-			if (key === 'lineType' && typeof value === 'number') {
-				converted[key] = LineType[value] ?? value;
-			}
-			// Convert kind enum for TrainType
-			else if (key === 'kind' && typeof value === 'number') {
-				converted[key] = TrainTypeKind[value] ?? value;
-			}
-			// Recursively convert nested objects
-			else {
+			if (typeof value === 'number') {
+				// Convert enum fields based on their key names
+				switch (key) {
+					case 'lineType':
+						converted[key] = LineType[value] ?? value;
+						break;
+					case 'kind':
+						converted[key] = TrainTypeKind[value] ?? value;
+						break;
+					case 'status':
+						converted[key] = OperationStatus[value] ?? value;
+						break;
+					case 'stopCondition':
+						converted[key] = StopCondition[value] ?? value;
+						break;
+					case 'type':
+						converted[key] = CompanyType[value] ?? value;
+						break;
+					case 'direction':
+						converted[key] = TrainDirection[value] ?? value;
+						break;
+					default:
+						converted[key] = convertEnumsToNames(value);
+				}
+			} else {
+				// Recursively convert nested objects
 				converted[key] = convertEnumsToNames(value);
 			}
 		}

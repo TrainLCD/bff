@@ -24,6 +24,35 @@ enum TrainTypeKind {
 	HighSpeedRapid
 }
 
+enum OperationStatus {
+	InOperation
+	NotOpened
+	Closed
+}
+
+enum StopCondition {
+	All
+	Not
+	Partial
+	Weekday
+	Holiday
+	PartialStop
+}
+
+enum CompanyType {
+	OtherCompany
+	JR
+	Private
+	Major
+	SemiMajor
+}
+
+enum TrainDirection {
+	Both
+	Inbound
+	Outbound
+}
+
 type Query {
 	station(id: Int!): Station
 	stations(ids: [Int!]!): [Station!]!
@@ -66,9 +95,9 @@ type Station {
 	longitude: Float
 	openedAt: String
 	closedAt: String
-	status: String
+	status: OperationStatus
 	stationNumbers: [StationNumber!]
-	stopCondition: String
+	stopCondition: StopCondition
 	distance: Float
 	hasTrainTypes: Boolean
 	trainType: TrainType
@@ -92,7 +121,7 @@ type Line {
 	color: String
 	lineType: LineType
 	lineSymbols: [LineSymbol!]
-	status: String
+	status: OperationStatus
 	station: Station
 	company: Company
 	trainType: TrainType
@@ -114,8 +143,8 @@ type Company {
 	nameEnglishShort: String
 	nameEnglishFull: String
 	url: String
-	type: String
-	status: String
+	type: CompanyType
+	status: OperationStatus
 	name: String
 }
 
@@ -131,7 +160,7 @@ type TrainType {
 	color: String
 	lines: [Line!]
 	line: Line
-	direction: String
+	direction: TrainDirection
 	kind: TrainTypeKind
 }
 
