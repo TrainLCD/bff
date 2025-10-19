@@ -28,10 +28,19 @@ npm run dev
 - The `compatibility_date` is `2025-10-11`; update it when adopting newer runtime capabilities.
 
 ## REST Endpoints (initial draft)
-- `GET /api/stations/:id` → `StationAPI.GetStationById`
-- `GET /api/stations?ids=1,2,3` → `StationAPI.GetStationByIdList`
-- `GET /api/stations/search?name=<text>&limit=<n>&from_station_group_id=<id>` → `StationAPI.GetStationsByName`
-- `GET /api/lines/:id` → `StationAPI.GetLineById`
+- `GET /api/stations/:id` → `GetStationById`
+- `GET /api/stations?ids=1,2,3` → `GetStationByIdList`
+- `GET /api/stations/nearby?latitude=<lat>&longitude=<lon>&limit=<n>` → `GetStationsByCoordinates`
+- `GET /api/stations/search?name=<text>&limit=<n>&from_station_group_id=<id>` → `GetStationsByName`
+- `GET /api/station-groups/{groupId}/stations` → `GetStationByGroupId`
+- `GET /api/line-groups/{lineGroupId}/stations` → `GetStationsByLineGroupId`
+- `GET /api/lines/{lineId}/stations?station_id=<id>` → `GetStationsByLineId`
+- `GET /api/stations/{stationId}/train-types` → `GetTrainTypesByStationId`
+- `GET /api/lines/:id` → `GetLineById`
+- `GET /api/lines/search?name=<text>&limit=<n>` → `GetLinesByName`
+- `GET /api/routes?from_station_group_id=<id>&to_station_group_id=<id>&page_size=<n>&page_token=<token>` → `GetRoutes`
+- `GET /api/route-types?from_station_group_id=<id>&to_station_group_id=<id>&page_size=<n>&page_token=<token>` → `GetRouteTypes`
+- `GET /api/routes/connected?from_station_group_id=<id>&to_station_group_id=<id>` → `GetConnectedRoutes`
 
 Additional gRPC methods can be surfaced by extending the router in `src/restGateway.ts` with the desired field mapping.
 

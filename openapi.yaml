@@ -1,0 +1,625 @@
+openapi: 3.0.3
+info:
+  title: SAPI BFF REST→gRPC Gateway
+  version: 0.1.0
+servers:
+  - url: https://{domain}
+    variables:
+      domain:
+        default: example.com
+paths:
+  /api/stations:
+    get:
+      summary: Get multiple stations by ID
+      description: >
+        Fetch multiple stations using the comma-separated `ids` query parameter.
+        Returns HTTP 400 when the parameter is missing or malformed.
+      parameters:
+        - name: ids
+          in: query
+          description: Comma-separated station IDs to retrieve.
+          required: true
+          schema:
+            type: string
+            example: "1,2,3"
+      responses:
+        "200":
+          description: Stations fetched successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MultipleStationResponse"
+        "400":
+          description: Invalid query parameters.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Gateway or upstream error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /api/stations/{id}:
+    get:
+      summary: Get station by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Station fetched successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SingleStationResponse"
+        "500":
+          description: Gateway or upstream error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /api/stations/nearby:
+    get:
+      summary: Get stations near coordinates
+      parameters:
+        - name: latitude
+          in: query
+          required: true
+          schema:
+            type: number
+            format: double
+        - name: longitude
+          in: query
+          required: true
+          schema:
+            type: number
+            format: double
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        "200":
+          description: Stations ordered by proximity.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MultipleStationResponse"
+        "400":
+          description: Missing or invalid coordinates.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Gateway or upstream error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /api/stations/search:
+    get:
+      summary: Search stations by name
+      parameters:
+        - name: name
+          in: query
+          description: Search keyword for station name.
+          required: true
+          schema:
+            type: string
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+        - name: from_station_group_id
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Stations matching the criteria.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MultipleStationResponse"
+        "400":
+          description: Missing or invalid query parameters.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Gateway or upstream error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /api/station-groups/{groupId}/stations:
+    get:
+      summary: List stations by station group ID
+      parameters:
+        - name: groupId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Stations associated with the group.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MultipleStationResponse"
+        "500":
+          description: Gateway or upstream error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /api/line-groups/{lineGroupId}/stations:
+    get:
+      summary: List stations by line group ID
+      parameters:
+        - name: lineGroupId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Stations served by the line group.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MultipleStationResponse"
+        "500":
+          description: Gateway or upstream error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /api/lines/{id}:
+    get:
+      summary: Get line by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Line fetched successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SingleLineResponse"
+        "500":
+          description: Gateway or upstream error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /api/lines/{lineId}/stations:
+    get:
+      summary: List stations served by a specific line
+      parameters:
+        - name: lineId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: station_id
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Stations for the line.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MultipleStationResponse"
+        "500":
+          description: Gateway or upstream error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /api/lines/search:
+    get:
+      summary: Search lines by name
+      parameters:
+        - name: name
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        "200":
+          description: Lines matching the criteria.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MultipleLineResponse"
+        "400":
+          description: Missing or invalid query parameters.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /api/routes:
+    get:
+      summary: Get candidate routes between station groups
+      parameters:
+        - name: from_station_group_id
+          in: query
+          required: true
+          schema:
+            type: integer
+        - name: to_station_group_id
+          in: query
+          required: true
+          schema:
+            type: integer
+        - name: page_size
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+        - name: page_token
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Route candidates and pagination token.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RouteResponse"
+        "400":
+          description: Missing or invalid query parameters.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Gateway or upstream error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /api/route-types:
+    get:
+      summary: Get available route types between station groups
+      parameters:
+        - name: from_station_group_id
+          in: query
+          required: true
+          schema:
+            type: integer
+        - name: to_station_group_id
+          in: query
+          required: true
+          schema:
+            type: integer
+        - name: page_size
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+        - name: page_token
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Train types and pagination token.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RouteTypeResponse"
+        "400":
+          description: Missing or invalid query parameters.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Gateway or upstream error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /api/routes/connected:
+    get:
+      summary: Get directly connected routes between station groups
+      parameters:
+        - name: from_station_group_id
+          in: query
+          required: true
+          schema:
+            type: integer
+        - name: to_station_group_id
+          in: query
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Connected routes between the groups.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RouteResponse"
+        "400":
+          description: Missing or invalid query parameters.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /api/stations/{stationId}/train-types:
+    get:
+      summary: List train types that serve a station
+      parameters:
+        - name: stationId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Train types serving the station.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MultipleTrainTypeResponse"
+        "500":
+          description: Gateway or upstream error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+components:
+  schemas:
+    ErrorResponse:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: string
+          example: Missing "name" query parameter
+    SingleStationResponse:
+      type: object
+      properties:
+        station:
+          $ref: "#/components/schemas/Station"
+    MultipleStationResponse:
+      type: object
+      properties:
+        stations:
+          type: array
+          items:
+            $ref: "#/components/schemas/Station"
+    SingleLineResponse:
+      type: object
+      properties:
+        line:
+          $ref: "#/components/schemas/Line"
+    MultipleLineResponse:
+      type: object
+      properties:
+        lines:
+          type: array
+          items:
+            $ref: "#/components/schemas/Line"
+    MultipleTrainTypeResponse:
+      type: object
+      properties:
+        trainTypes:
+          type: array
+          items:
+            $ref: "#/components/schemas/TrainType"
+    RouteResponse:
+      type: object
+      properties:
+        routes:
+          type: array
+          items:
+            $ref: "#/components/schemas/Route"
+        nextPageToken:
+          type: string
+    RouteTypeResponse:
+      type: object
+      properties:
+        trainTypes:
+          type: array
+          items:
+            $ref: "#/components/schemas/TrainType"
+        nextPageToken:
+          type: string
+    Station:
+      type: object
+      properties:
+        id:
+          type: integer
+        groupId:
+          type: integer
+        name:
+          type: string
+        nameKatakana:
+          type: string
+        nameRoman:
+          type: string
+          nullable: true
+        nameChinese:
+          type: string
+          nullable: true
+        nameKorean:
+          type: string
+          nullable: true
+        threeLetterCode:
+          type: string
+          nullable: true
+        prefectureId:
+          type: integer
+        postalCode:
+          type: string
+        address:
+          type: string
+        latitude:
+          type: number
+          format: double
+        longitude:
+          type: number
+          format: double
+        openedAt:
+          type: string
+        closedAt:
+          type: string
+        status:
+          type: string
+          enum:
+            - InOperation
+            - NotOpened
+            - Closed
+        stopCondition:
+          type: string
+        stationNumbers:
+          type: array
+          items:
+            $ref: "#/components/schemas/StationNumber"
+        lines:
+          type: array
+          items:
+            $ref: "#/components/schemas/Line"
+        distance:
+          type: number
+          format: double
+          nullable: true
+        hasTrainTypes:
+          type: boolean
+          nullable: true
+        trainType:
+          $ref: "#/components/schemas/TrainType"
+    StationNumber:
+      type: object
+      properties:
+        lineSymbol:
+          type: string
+        lineSymbolColor:
+          type: string
+        lineSymbolShape:
+          type: string
+        stationNumber:
+          type: string
+    Line:
+      type: object
+      properties:
+        id:
+          type: integer
+        nameShort:
+          type: string
+        nameKatakana:
+          type: string
+        nameFull:
+          type: string
+        nameRoman:
+          type: string
+          nullable: true
+        color:
+          type: string
+        lineType:
+          type: string
+        status:
+          type: string
+        company:
+          $ref: "#/components/schemas/Company"
+        lineSymbols:
+          type: array
+          items:
+            $ref: "#/components/schemas/LineSymbol"
+        averageDistance:
+          type: number
+          format: double
+          nullable: true
+        trainType:
+          $ref: "#/components/schemas/TrainType"
+    Company:
+      type: object
+      properties:
+        id:
+          type: integer
+        nameFull:
+          type: string
+        nameShort:
+          type: string
+    LineSymbol:
+      type: object
+      properties:
+        symbol:
+          type: string
+        color:
+          type: string
+        shape:
+          type: string
+    TrainType:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        nameKatakana:
+          type: string
+        nameRoman:
+          type: string
+          nullable: true
+        nameChinese:
+          type: string
+          nullable: true
+        nameKorean:
+          type: string
+          nullable: true
+        color:
+          type: string
+        direction:
+          type: string
+        kind:
+          type: string
+        lines:
+          type: array
+          items:
+            $ref: "#/components/schemas/Line"
+    Route:
+      type: object
+      properties:
+        id:
+          type: integer
+        stops:
+          type: array
+          items:
+            $ref: "#/components/schemas/Station"
