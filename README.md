@@ -28,7 +28,7 @@ npm run dev
 - The `compatibility_date` is `2025-10-11`; update it when adopting newer runtime capabilities.
 
 ## GraphQL Endpoint
-- GraphQL endpoint is exposed at `POST /graphql`.
+- GraphQL endpoint is exposed at `/graphql` (`POST` for queries, `GET` returns the SDL).
 - The runtime schema is declared in `schema.graphql` and mirrored in `src/graphqlGateway.ts`.
 - Supported queries include:
   - `station(id: Int!)`

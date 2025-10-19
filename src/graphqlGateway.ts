@@ -179,6 +179,10 @@ export async function handleGraphQLRequest(request: Request, env: GatewayEnv): P
 		return buildGraphQLErrorResponse(403, 'Origin not allowed', null);
 	}
 
+	if (request.method === 'GET') {
+		return buildSchemaResponse(schemaSDL, allowedOrigin);
+	}
+
 	if (request.method !== 'POST') {
 		return buildGraphQLErrorResponse(405, 'Method Not Allowed', allowedOrigin, [['Allow', 'POST, OPTIONS']]);
 	}
@@ -532,6 +536,16 @@ function buildGraphQLResponse(result: unknown, allowedOrigin: string | null): Re
 		appendVary(headers, 'Origin');
 	}
 	return new Response(JSON.stringify(result), { status: 200, headers });
+}
+
+function buildSchemaResponse(sdl: string, allowedOrigin: string | null): Response {
+	const headers = new Headers();
+	headers.set('content-type', 'text/plain; charset=utf-8');
+	if (allowedOrigin) {
+		headers.set('Access-Control-Allow-Origin', allowedOrigin);
+		appendVary(headers, 'Origin');
+	}
+	return new Response(sdl, { status: 200, headers });
 }
 
 function buildGraphQLErrorResponse(
