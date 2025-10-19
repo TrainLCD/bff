@@ -14,8 +14,6 @@ type GatewayEnv = Env & {
 
 interface GatewayConfig {
 	targetOrigin: string;
-	allowedOrigins: readonly string[];
-	allowAnyOrigin: boolean;
 }
 
 type MessageType = {
@@ -174,28 +172,25 @@ export async function handleGraphQLRequest(request: Request, env: GatewayEnv): P
 	}
 
 	const origin = request.headers.get('Origin');
-	const allowedOrigin = resolveAllowedOrigin(origin, config);
-	if (!allowedOrigin) {
-		return buildGraphQLErrorResponse(403, 'Origin not allowed', null);
-	}
+	const corsOrigin = origin ?? '*';
 
 	if (request.method === 'GET') {
-		return buildSchemaResponse(schemaSDL, allowedOrigin);
+		return buildSchemaResponse(schemaSDL, corsOrigin);
 	}
 
 	if (request.method !== 'POST') {
-		return buildGraphQLErrorResponse(405, 'Method Not Allowed', allowedOrigin, [['Allow', 'POST, OPTIONS']]);
+		return buildGraphQLErrorResponse(405, 'Method Not Allowed', corsOrigin, [['Allow', 'POST, OPTIONS']]);
 	}
 
 	let body: unknown;
 	try {
 		body = await request.json();
 	} catch {
-		return buildGraphQLErrorResponse(400, 'Invalid JSON payload', allowedOrigin);
+		return buildGraphQLErrorResponse(400, 'Invalid JSON payload', corsOrigin);
 	}
 
 	if (typeof body !== 'object' || body === null) {
-		return buildGraphQLErrorResponse(400, 'Invalid GraphQL request body', allowedOrigin);
+		return buildGraphQLErrorResponse(400, 'Invalid GraphQL request body', corsOrigin);
 	}
 
 	const { query, variables, operationName } = body as {
@@ -205,7 +200,7 @@ export async function handleGraphQLRequest(request: Request, env: GatewayEnv): P
 	};
 
 	if (typeof query !== 'string') {
-		return buildGraphQLErrorResponse(400, 'Missing GraphQL query', allowedOrigin);
+		return buildGraphQLErrorResponse(400, 'Missing GraphQL query', corsOrigin);
 	}
 
 	const variableValues = typeof variables === 'object' && variables !== null ? (variables as Record<string, unknown>) : undefined;
@@ -222,7 +217,7 @@ export async function handleGraphQLRequest(request: Request, env: GatewayEnv): P
 		rootValue,
 	});
 
-	return buildGraphQLResponse(result, allowedOrigin);
+	return buildGraphQLResponse(result, corsOrigin);
 }
 
 function createResolvers(client: GrpcClient) {
@@ -482,46 +477,18 @@ function resolveConfig(env: GatewayEnv): GatewayConfig {
 		const message = parseError instanceof Error ? parseError.message : 'unknown error';
 		throw new Error(`Invalid GRPC_TARGET_ORIGIN value: ${message}`);
 	}
-	const allowedOrigins = parseAllowedOrigins(env.GRPC_ALLOWED_ORIGINS);
-	const allowAnyOrigin = allowedOrigins.includes('*');
-	return {
-		targetOrigin,
-		allowedOrigins,
-		allowAnyOrigin,
-	};
+return {
+	targetOrigin,
+};
 }
 
-function parseAllowedOrigins(input: string | undefined): string[] {
-	if (!input) {
-		return ['*'];
-	}
-	return input
-		.split(',')
-		.map((value) => value.trim())
-		.filter((value, index, array) => value.length > 0 && array.indexOf(value) === index);
-}
-
-function resolveAllowedOrigin(origin: string | null, config: GatewayConfig): string | null {
-	if (config.allowAnyOrigin) {
-		return origin ?? '*';
-	}
-	if (!origin) {
-		return null;
-	}
-	return config.allowedOrigins.includes(origin) ? origin : null;
-}
-
-function handlePreflight(request: Request, config: GatewayConfig): Response {
+function handlePreflight(request: Request, _config: GatewayConfig): Response {
 	const origin = request.headers.get('Origin');
-	const allowedOrigin = resolveAllowedOrigin(origin, config);
-	if (!allowedOrigin) {
-		return buildGraphQLErrorResponse(403, 'Origin not allowed', null);
-	}
+	const corsOrigin = origin ?? '*';
 	const requestedHeaders =
 		request.headers.get('Access-Control-Request-Headers') ?? DEFAULT_ALLOWED_HEADERS;
 	const headers = new Headers();
-	headers.set('Access-Control-Allow-Origin', allowedOrigin);
-	appendVary(headers, 'Origin');
+setCorsOrigin(headers, corsOrigin);
 	headers.set('Access-Control-Allow-Methods', 'POST, OPTIONS');
 	headers.set('Access-Control-Allow-Headers', requestedHeaders);
 	headers.set('Access-Control-Max-Age', '1800');
@@ -531,20 +498,14 @@ function handlePreflight(request: Request, config: GatewayConfig): Response {
 function buildGraphQLResponse(result: unknown, allowedOrigin: string | null): Response {
 	const headers = new Headers();
 	headers.set('content-type', 'application/json; charset=utf-8');
-	if (allowedOrigin) {
-		headers.set('Access-Control-Allow-Origin', allowedOrigin);
-		appendVary(headers, 'Origin');
-	}
+	setCorsOrigin(headers, allowedOrigin);
 	return new Response(JSON.stringify(result), { status: 200, headers });
 }
 
 function buildSchemaResponse(sdl: string, allowedOrigin: string | null): Response {
 	const headers = new Headers();
 	headers.set('content-type', 'text/plain; charset=utf-8');
-	if (allowedOrigin) {
-		headers.set('Access-Control-Allow-Origin', allowedOrigin);
-		appendVary(headers, 'Origin');
-	}
+	setCorsOrigin(headers, allowedOrigin);
 	return new Response(sdl, { status: 200, headers });
 }
 
@@ -556,10 +517,7 @@ function buildGraphQLErrorResponse(
 ): Response {
 	const headers = new Headers();
 	headers.set('content-type', 'application/json; charset=utf-8');
-	if (allowedOrigin) {
-		headers.set('Access-Control-Allow-Origin', allowedOrigin);
-		appendVary(headers, 'Origin');
-	}
+	setCorsOrigin(headers, allowedOrigin);
 	if (additionalHeaders) {
 		for (const [key, value] of additionalHeaders) {
 			headers.set(key, value);
@@ -638,5 +596,16 @@ function appendVary(headers: Headers, value: string): void {
 	if (!parts.map((part) => part.toLowerCase()).includes(normalized)) {
 		parts.push(value);
 		headers.set('Vary', parts.join(', '));
+	}
+}
+
+function setCorsOrigin(headers: Headers, allowedOrigin: string | null): void {
+	if (!allowedOrigin) {
+		return;
+	}
+	const value = allowedOrigin === '*' ? '*' : allowedOrigin;
+	headers.set('Access-Control-Allow-Origin', value);
+	if (value !== '*') {
+		appendVary(headers, 'Origin');
 	}
 }
