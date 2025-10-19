@@ -7,6 +7,10 @@ const SERVICE_FQN = 'app.trainlcd.grpc.StationAPI';
 const DEFAULT_ALLOWED_HEADERS = 'content-type,authorization,x-requested-with,x-api-key,x-trace-id';
 const GATEWAY_USER_AGENT = 'sapi-bff-graphql-gateway/0.1';
 
+// Enum mappings
+const LineType = grpcTypes.LineType;
+const TrainTypeKind = grpcTypes.TrainTypeKind;
+
 type GatewayEnv = Env & {
 	GRPC_TARGET_ORIGIN?: string;
 	GRPC_ALLOWED_ORIGINS?: string;
@@ -37,6 +41,24 @@ class GrpcError extends Error {
 const schemaSDL = /* GraphQL */ `
 	schema {
 		query: Query
+	}
+
+	enum LineType {
+		OtherLineType
+		BulletTrain
+		Normal
+		Subway
+		Tram
+		MonorailOrAGT
+	}
+
+	enum TrainTypeKind {
+		Default
+		Branch
+		Rapid
+		Express
+		LimitedExpress
+		HighSpeedRapid
 	}
 
 	type Query {
@@ -105,7 +127,7 @@ const schemaSDL = /* GraphQL */ `
 		nameFull: String
 		nameRoman: String
 		color: String
-		lineType: String
+		lineType: LineType
 		lineSymbols: [LineSymbol!]
 		status: String
 		station: Station
@@ -147,7 +169,7 @@ const schemaSDL = /* GraphQL */ `
 		lines: [Line!]
 		line: Line
 		direction: String
-		kind: String
+		kind: TrainTypeKind
 	}
 
 	type Route {
@@ -442,11 +464,12 @@ class GrpcClient {
 			}
 
 			const decoded = responseType.decode(messages[0]);
-			return responseType.toObject(decoded, {
+			const obj = responseType.toObject(decoded, {
 				longs: Number,
-				enums: String,
+				enums: Number,
 				defaults: true,
 			});
+			return convertEnumsToNames(obj);
 		} catch (error) {
 			if (error instanceof GrpcError) {
 				throw new GraphQLError(error.publicMessage, {
@@ -534,6 +557,37 @@ function cleanPayload<T extends Record<string, unknown>>(payload: T): T {
 		}
 	}
 	return cleaned as T;
+}
+
+function convertEnumsToNames(obj: any): any {
+	if (obj === null || obj === undefined) {
+		return obj;
+	}
+	
+	if (Array.isArray(obj)) {
+		return obj.map(item => convertEnumsToNames(item));
+	}
+	
+	if (typeof obj === 'object') {
+		const converted: any = {};
+		for (const [key, value] of Object.entries(obj)) {
+			// Convert lineType enum
+			if (key === 'lineType' && typeof value === 'number') {
+				converted[key] = LineType[value] ?? value;
+			}
+			// Convert kind enum for TrainType
+			else if (key === 'kind' && typeof value === 'number') {
+				converted[key] = TrainTypeKind[value] ?? value;
+			}
+			// Recursively convert nested objects
+			else {
+				converted[key] = convertEnumsToNames(value);
+			}
+		}
+		return converted;
+	}
+	
+	return obj;
 }
 
 function frameGrpcWebMessage(messageBytes: Uint8Array): Uint8Array {
