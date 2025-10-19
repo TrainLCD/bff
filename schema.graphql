@@ -2,6 +2,24 @@ schema {
 	query: Query
 }
 
+enum LineType {
+	OtherLineType
+	BulletTrain
+	Normal
+	Subway
+	Tram
+	MonorailOrAGT
+}
+
+enum TrainTypeKind {
+	Default
+	Branch
+	Rapid
+	Express
+	LimitedExpress
+	HighSpeedRapid
+}
+
 type Query {
 	station(id: Int!): Station
 	stations(ids: [Int!]!): [Station!]!
@@ -68,7 +86,7 @@ type Line {
 	nameFull: String
 	nameRoman: String
 	color: String
-	lineType: String
+	lineType: LineType
 	lineSymbols: [LineSymbol!]
 	status: String
 	station: Station
@@ -110,7 +128,7 @@ type TrainType {
 	lines: [Line!]
 	line: Line
 	direction: String
-	kind: String
+	kind: TrainTypeKind
 }
 
 type Route {
