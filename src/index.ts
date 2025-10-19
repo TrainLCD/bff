@@ -1,11 +1,11 @@
 /**
- * Cloudflare Workers entry point routing gRPC-Web requests to the upstream service.
+ * Cloudflare Workers entry point exposing REST endpoints backed by gRPC-Web upstream calls.
  */
 
-import { handleGrpcWebProxyRequest } from './grpcProxy';
+import { handleRestGatewayRequest } from './restGateway';
 
 export default {
 	async fetch(request, env, _ctx): Promise<Response> {
-		return handleGrpcWebProxyRequest(request, env);
+		return handleRestGatewayRequest(request, env);
 	},
 } satisfies ExportedHandler<Env>;

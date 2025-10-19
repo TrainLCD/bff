@@ -1,8 +1,9 @@
 # Repository Guidelines
 
 ## Project Structure & Module Organization
-- Keep `src/index.ts` minimal; delegate logic to helper modules such as `src/grpcProxy.ts`.
-- Implement new gRPC-Web behavior in composable utilities under `src/` alongside `grpcProxy.ts`.
+- Keep `src/index.ts` minimal; delegate logic to helper modules such as `src/restGateway.ts`.
+- Implement new REST routes or gRPC-Web integrations in composable utilities under `src/` beside `restGateway.ts`.
+- Store protobuf assets under `proto/` and regenerate static modules in `src/generated/` when the schema changes.
 - Store shared tests in `/test` next to `index.spec.ts` and `env.d.ts`; add suites beside existing files for discoverability.
 - Runtime configuration lives in `wrangler.jsonc`, while type generation flows through `worker-configuration.d.ts`. Application code compiles via `tsconfig.json`; tests use `test/tsconfig.json`.
 
@@ -16,6 +17,7 @@
 - `npm run test`: Execute Vitest against the Workers pool, covering CORS, proxy forwarding, and configuration-failure paths.
 - `npm run deploy`: Deploy through Wrangler using the currently authenticated Cloudflare account.
 - `npm run cf-typegen`: Regenerate runtime typings after updating `wrangler.jsonc` or rotating secrets.
+- `npm run proto:generate`: Rebuild `src/generated/stationapi.js` / `.d.ts` from `proto/stationapi.proto` via `protobufjs`.
 
 ## Coding Style & Naming Conventions
 - Preserve tab indentation and the existing single-blank-line grouping.
@@ -24,7 +26,7 @@
 
 ## Testing Guidelines
 - Rely on Vitest with `@cloudflare/vitest-pool-workers`, using `SELF.fetch` and `createExecutionContext()` for realistic execution.
-- Group specs by observable behavior (gRPC happy paths, CORS preflight, configuration errors) and cover both success and failure cases.
+- Group specs by observable behaviour (REST routing, gRPC-Web happy paths, validation failures) and cover both success and failure cases.
 - When adding asynchronous side work, wait for `ctx.waitUntil()` by calling `waitOnExecutionContext`.
 - Refresh inline snapshots via `npm run test -- --update` and review the resulting diffs before committing.
 
