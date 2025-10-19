@@ -4,6 +4,7 @@
 - Keep `src/index.ts` minimal; delegate logic to helper modules such as `src/graphqlGateway.ts`.
 - Implement new GraphQL fields or gRPC-Web integrations in composable utilities under `src/` beside `graphqlGateway.ts`.
 - Store protobuf assets under `proto/` and regenerate static modules in `src/generated/` when the schema changes.
+- The GraphQL schema source of truth is `schema.graphql`; run `npm run schema:generate` to regenerate `src/schema.ts` after edits.
 - Store shared tests in `/test` next to `index.spec.ts` and `env.d.ts`; add suites beside existing files for discoverability.
 - Runtime configuration lives in `wrangler.jsonc`, while type generation flows through `worker-configuration.d.ts`. Application code compiles via `tsconfig.json`; tests use `test/tsconfig.json`.
 
@@ -18,6 +19,7 @@
 - `npm run deploy`: Deploy through Wrangler using the currently authenticated Cloudflare account.
 - `npm run cf-typegen`: Regenerate runtime typings after updating `wrangler.jsonc` or rotating secrets.
 - `npm run proto:generate`: Rebuild `src/generated/stationapi.js` / `.d.ts` from `proto/stationapi.proto` via `protobufjs`.
+- `npm run schema:generate`: Regenerate `src/schema.ts` from `schema.graphql` - run this after modifying the GraphQL schema.
 
 ## Coding Style & Naming Conventions
 - Preserve tab indentation and the existing single-blank-line grouping.

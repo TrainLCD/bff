@@ -1,0 +1,142 @@
+// This file is auto-generated from schema.graphql
+// DO NOT EDIT MANUALLY - run: npm run schema:generate
+
+export const schemaSDL = /* GraphQL */ `
+schema {
+	query: Query
+}
+
+enum LineType {
+	OtherLineType
+	BulletTrain
+	Normal
+	Subway
+	Tram
+	MonorailOrAGT
+}
+
+enum TrainTypeKind {
+	Default
+	Branch
+	Rapid
+	Express
+	LimitedExpress
+	HighSpeedRapid
+}
+
+type Query {
+	station(id: Int!): Station
+	stations(ids: [Int!]!): [Station!]!
+	stationsNearby(latitude: Float!, longitude: Float!, limit: Int): [Station!]!
+	stationsByName(name: String!, limit: Int, fromStationGroupId: Int): [Station!]!
+	stationGroupStations(groupId: Int!): [Station!]!
+	lineGroupStations(lineGroupId: Int!): [Station!]!
+	line(lineId: Int!): Line
+	linesByName(name: String!, limit: Int): [Line!]!
+	lineStations(lineId: Int!, stationId: Int): [Station!]!
+	stationTrainTypes(stationId: Int!): [TrainType!]!
+	routes(fromStationGroupId: Int!, toStationGroupId: Int!, pageSize: Int, pageToken: String): RoutePage!
+	routeTypes(fromStationGroupId: Int!, toStationGroupId: Int!, pageSize: Int, pageToken: String): RouteTypePage!
+	connectedRoutes(fromStationGroupId: Int!, toStationGroupId: Int!): [Route!]!
+}
+
+type RoutePage {
+	routes: [Route!]
+	nextPageToken: String
+}
+
+type RouteTypePage {
+	trainTypes: [TrainType!]
+	nextPageToken: String
+}
+
+type Station {
+	id: Int
+	groupId: Int
+	name: String
+	nameKatakana: String
+	nameRoman: String
+	nameChinese: String
+	nameKorean: String
+	threeLetterCode: String
+	prefectureId: Int
+	postalCode: String
+	address: String
+	latitude: Float
+	longitude: Float
+	openedAt: String
+	closedAt: String
+	status: String
+	stationNumbers: [StationNumber!]
+	stopCondition: String
+	distance: Float
+	hasTrainTypes: Boolean
+	trainType: TrainType
+	lines: [Line!]
+	line: Line
+}
+
+type StationNumber {
+	lineSymbol: String
+	lineSymbolColor: String
+	lineSymbolShape: String
+	stationNumber: String
+}
+
+type Line {
+	id: Int
+	nameShort: String
+	nameKatakana: String
+	nameFull: String
+	nameRoman: String
+	color: String
+	lineType: LineType
+	lineSymbols: [LineSymbol!]
+	status: String
+	station: Station
+	company: Company
+	trainType: TrainType
+	averageDistance: Float
+}
+
+type LineSymbol {
+	symbol: String
+	color: String
+	shape: String
+}
+
+type Company {
+	id: Int
+	railroadId: Int
+	nameShort: String
+	nameKatakana: String
+	nameFull: String
+	nameEnglishShort: String
+	nameEnglishFull: String
+	url: String
+	type: String
+	status: String
+	name: String
+}
+
+type TrainType {
+	id: Int
+	typeId: Int
+	groupId: Int
+	name: String
+	nameKatakana: String
+	nameRoman: String
+	nameChinese: String
+	nameKorean: String
+	color: String
+	lines: [Line!]
+	line: Line
+	direction: String
+	kind: TrainTypeKind
+}
+
+type Route {
+	id: Int
+	stops: [Station!]
+}
+`;
