@@ -364,6 +364,39 @@ export const app = $root.app = (() => {
                  */
 
                 /**
+                 * Callback as used by {@link app.trainlcd.grpc.StationAPI#getRoutesMinimal}.
+                 * @memberof app.trainlcd.grpc.StationAPI
+                 * @typedef GetRoutesMinimalCallback
+                 * @type {function}
+                 * @param {Error|null} error Error, if any
+                 * @param {app.trainlcd.grpc.RouteMinimalResponse} [response] RouteMinimalResponse
+                 */
+
+                /**
+                 * Calls GetRoutesMinimal.
+                 * @function getRoutesMinimal
+                 * @memberof app.trainlcd.grpc.StationAPI
+                 * @instance
+                 * @param {app.trainlcd.grpc.IGetRouteRequest} request GetRouteRequest message or plain object
+                 * @param {app.trainlcd.grpc.StationAPI.GetRoutesMinimalCallback} callback Node-style callback called with the error, if any, and RouteMinimalResponse
+                 * @returns {undefined}
+                 * @variation 1
+                 */
+                Object.defineProperty(StationAPI.prototype.getRoutesMinimal = function getRoutesMinimal(request, callback) {
+                    return this.rpcCall(getRoutesMinimal, $root.app.trainlcd.grpc.GetRouteRequest, $root.app.trainlcd.grpc.RouteMinimalResponse, request, callback);
+                }, "name", { value: "GetRoutesMinimal" });
+
+                /**
+                 * Calls GetRoutesMinimal.
+                 * @function getRoutesMinimal
+                 * @memberof app.trainlcd.grpc.StationAPI
+                 * @instance
+                 * @param {app.trainlcd.grpc.IGetRouteRequest} request GetRouteRequest message or plain object
+                 * @returns {Promise<app.trainlcd.grpc.RouteMinimalResponse>} Promise
+                 * @variation 2
+                 */
+
+                /**
                  * Callback as used by {@link app.trainlcd.grpc.StationAPI#getLineById}.
                  * @memberof app.trainlcd.grpc.StationAPI
                  * @typedef GetLineByIdCallback
@@ -393,6 +426,39 @@ export const app = $root.app = (() => {
                  * @instance
                  * @param {app.trainlcd.grpc.IGetLineByIdRequest} request GetLineByIdRequest message or plain object
                  * @returns {Promise<app.trainlcd.grpc.SingleLineResponse>} Promise
+                 * @variation 2
+                 */
+
+                /**
+                 * Callback as used by {@link app.trainlcd.grpc.StationAPI#getLineByIdList}.
+                 * @memberof app.trainlcd.grpc.StationAPI
+                 * @typedef GetLineByIdListCallback
+                 * @type {function}
+                 * @param {Error|null} error Error, if any
+                 * @param {app.trainlcd.grpc.MultipleLineResponse} [response] MultipleLineResponse
+                 */
+
+                /**
+                 * Calls GetLineByIdList.
+                 * @function getLineByIdList
+                 * @memberof app.trainlcd.grpc.StationAPI
+                 * @instance
+                 * @param {app.trainlcd.grpc.IGetLineByIdListRequest} request GetLineByIdListRequest message or plain object
+                 * @param {app.trainlcd.grpc.StationAPI.GetLineByIdListCallback} callback Node-style callback called with the error, if any, and MultipleLineResponse
+                 * @returns {undefined}
+                 * @variation 1
+                 */
+                Object.defineProperty(StationAPI.prototype.getLineByIdList = function getLineByIdList(request, callback) {
+                    return this.rpcCall(getLineByIdList, $root.app.trainlcd.grpc.GetLineByIdListRequest, $root.app.trainlcd.grpc.MultipleLineResponse, request, callback);
+                }, "name", { value: "GetLineByIdList" });
+
+                /**
+                 * Calls GetLineByIdList.
+                 * @function getLineByIdList
+                 * @memberof app.trainlcd.grpc.StationAPI
+                 * @instance
+                 * @param {app.trainlcd.grpc.IGetLineByIdListRequest} request GetLineByIdListRequest message or plain object
+                 * @returns {Promise<app.trainlcd.grpc.MultipleLineResponse>} Promise
                  * @variation 2
                  */
 
@@ -2828,6 +2894,235 @@ export const app = $root.app = (() => {
                 };
 
                 return GetLineByIdRequest;
+            })();
+
+            grpc.GetLineByIdListRequest = (function() {
+
+                /**
+                 * Properties of a GetLineByIdListRequest.
+                 * @memberof app.trainlcd.grpc
+                 * @interface IGetLineByIdListRequest
+                 * @property {Array.<number>|null} [lineIds] GetLineByIdListRequest lineIds
+                 */
+
+                /**
+                 * Constructs a new GetLineByIdListRequest.
+                 * @memberof app.trainlcd.grpc
+                 * @classdesc Represents a GetLineByIdListRequest.
+                 * @implements IGetLineByIdListRequest
+                 * @constructor
+                 * @param {app.trainlcd.grpc.IGetLineByIdListRequest=} [properties] Properties to set
+                 */
+                function GetLineByIdListRequest(properties) {
+                    this.lineIds = [];
+                    if (properties)
+                        for (let keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                            if (properties[keys[i]] != null)
+                                this[keys[i]] = properties[keys[i]];
+                }
+
+                /**
+                 * GetLineByIdListRequest lineIds.
+                 * @member {Array.<number>} lineIds
+                 * @memberof app.trainlcd.grpc.GetLineByIdListRequest
+                 * @instance
+                 */
+                GetLineByIdListRequest.prototype.lineIds = $util.emptyArray;
+
+                /**
+                 * Creates a new GetLineByIdListRequest instance using the specified properties.
+                 * @function create
+                 * @memberof app.trainlcd.grpc.GetLineByIdListRequest
+                 * @static
+                 * @param {app.trainlcd.grpc.IGetLineByIdListRequest=} [properties] Properties to set
+                 * @returns {app.trainlcd.grpc.GetLineByIdListRequest} GetLineByIdListRequest instance
+                 */
+                GetLineByIdListRequest.create = function create(properties) {
+                    return new GetLineByIdListRequest(properties);
+                };
+
+                /**
+                 * Encodes the specified GetLineByIdListRequest message. Does not implicitly {@link app.trainlcd.grpc.GetLineByIdListRequest.verify|verify} messages.
+                 * @function encode
+                 * @memberof app.trainlcd.grpc.GetLineByIdListRequest
+                 * @static
+                 * @param {app.trainlcd.grpc.IGetLineByIdListRequest} message GetLineByIdListRequest message or plain object to encode
+                 * @param {$protobuf.Writer} [writer] Writer to encode to
+                 * @returns {$protobuf.Writer} Writer
+                 */
+                GetLineByIdListRequest.encode = function encode(message, writer) {
+                    if (!writer)
+                        writer = $Writer.create();
+                    if (message.lineIds != null && message.lineIds.length) {
+                        writer.uint32(/* id 1, wireType 2 =*/10).fork();
+                        for (let i = 0; i < message.lineIds.length; ++i)
+                            writer.uint32(message.lineIds[i]);
+                        writer.ldelim();
+                    }
+                    return writer;
+                };
+
+                /**
+                 * Encodes the specified GetLineByIdListRequest message, length delimited. Does not implicitly {@link app.trainlcd.grpc.GetLineByIdListRequest.verify|verify} messages.
+                 * @function encodeDelimited
+                 * @memberof app.trainlcd.grpc.GetLineByIdListRequest
+                 * @static
+                 * @param {app.trainlcd.grpc.IGetLineByIdListRequest} message GetLineByIdListRequest message or plain object to encode
+                 * @param {$protobuf.Writer} [writer] Writer to encode to
+                 * @returns {$protobuf.Writer} Writer
+                 */
+                GetLineByIdListRequest.encodeDelimited = function encodeDelimited(message, writer) {
+                    return this.encode(message, writer).ldelim();
+                };
+
+                /**
+                 * Decodes a GetLineByIdListRequest message from the specified reader or buffer.
+                 * @function decode
+                 * @memberof app.trainlcd.grpc.GetLineByIdListRequest
+                 * @static
+                 * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+                 * @param {number} [length] Message length if known beforehand
+                 * @returns {app.trainlcd.grpc.GetLineByIdListRequest} GetLineByIdListRequest
+                 * @throws {Error} If the payload is not a reader or valid buffer
+                 * @throws {$protobuf.util.ProtocolError} If required fields are missing
+                 */
+                GetLineByIdListRequest.decode = function decode(reader, length, error) {
+                    if (!(reader instanceof $Reader))
+                        reader = $Reader.create(reader);
+                    let end = length === undefined ? reader.len : reader.pos + length, message = new $root.app.trainlcd.grpc.GetLineByIdListRequest();
+                    while (reader.pos < end) {
+                        let tag = reader.uint32();
+                        if (tag === error)
+                            break;
+                        switch (tag >>> 3) {
+                        case 1: {
+                                if (!(message.lineIds && message.lineIds.length))
+                                    message.lineIds = [];
+                                if ((tag & 7) === 2) {
+                                    let end2 = reader.uint32() + reader.pos;
+                                    while (reader.pos < end2)
+                                        message.lineIds.push(reader.uint32());
+                                } else
+                                    message.lineIds.push(reader.uint32());
+                                break;
+                            }
+                        default:
+                            reader.skipType(tag & 7);
+                            break;
+                        }
+                    }
+                    return message;
+                };
+
+                /**
+                 * Decodes a GetLineByIdListRequest message from the specified reader or buffer, length delimited.
+                 * @function decodeDelimited
+                 * @memberof app.trainlcd.grpc.GetLineByIdListRequest
+                 * @static
+                 * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+                 * @returns {app.trainlcd.grpc.GetLineByIdListRequest} GetLineByIdListRequest
+                 * @throws {Error} If the payload is not a reader or valid buffer
+                 * @throws {$protobuf.util.ProtocolError} If required fields are missing
+                 */
+                GetLineByIdListRequest.decodeDelimited = function decodeDelimited(reader) {
+                    if (!(reader instanceof $Reader))
+                        reader = new $Reader(reader);
+                    return this.decode(reader, reader.uint32());
+                };
+
+                /**
+                 * Verifies a GetLineByIdListRequest message.
+                 * @function verify
+                 * @memberof app.trainlcd.grpc.GetLineByIdListRequest
+                 * @static
+                 * @param {Object.<string,*>} message Plain object to verify
+                 * @returns {string|null} `null` if valid, otherwise the reason why it is not
+                 */
+                GetLineByIdListRequest.verify = function verify(message) {
+                    if (typeof message !== "object" || message === null)
+                        return "object expected";
+                    if (message.lineIds != null && message.hasOwnProperty("lineIds")) {
+                        if (!Array.isArray(message.lineIds))
+                            return "lineIds: array expected";
+                        for (let i = 0; i < message.lineIds.length; ++i)
+                            if (!$util.isInteger(message.lineIds[i]))
+                                return "lineIds: integer[] expected";
+                    }
+                    return null;
+                };
+
+                /**
+                 * Creates a GetLineByIdListRequest message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof app.trainlcd.grpc.GetLineByIdListRequest
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {app.trainlcd.grpc.GetLineByIdListRequest} GetLineByIdListRequest
+                 */
+                GetLineByIdListRequest.fromObject = function fromObject(object) {
+                    if (object instanceof $root.app.trainlcd.grpc.GetLineByIdListRequest)
+                        return object;
+                    let message = new $root.app.trainlcd.grpc.GetLineByIdListRequest();
+                    if (object.lineIds) {
+                        if (!Array.isArray(object.lineIds))
+                            throw TypeError(".app.trainlcd.grpc.GetLineByIdListRequest.lineIds: array expected");
+                        message.lineIds = [];
+                        for (let i = 0; i < object.lineIds.length; ++i)
+                            message.lineIds[i] = object.lineIds[i] >>> 0;
+                    }
+                    return message;
+                };
+
+                /**
+                 * Creates a plain object from a GetLineByIdListRequest message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof app.trainlcd.grpc.GetLineByIdListRequest
+                 * @static
+                 * @param {app.trainlcd.grpc.GetLineByIdListRequest} message GetLineByIdListRequest
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                GetLineByIdListRequest.toObject = function toObject(message, options) {
+                    if (!options)
+                        options = {};
+                    let object = {};
+                    if (options.arrays || options.defaults)
+                        object.lineIds = [];
+                    if (message.lineIds && message.lineIds.length) {
+                        object.lineIds = [];
+                        for (let j = 0; j < message.lineIds.length; ++j)
+                            object.lineIds[j] = message.lineIds[j];
+                    }
+                    return object;
+                };
+
+                /**
+                 * Converts this GetLineByIdListRequest to JSON.
+                 * @function toJSON
+                 * @memberof app.trainlcd.grpc.GetLineByIdListRequest
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                GetLineByIdListRequest.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
+
+                /**
+                 * Gets the default type url for GetLineByIdListRequest
+                 * @function getTypeUrl
+                 * @memberof app.trainlcd.grpc.GetLineByIdListRequest
+                 * @static
+                 * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns {string} The default type url
+                 */
+                GetLineByIdListRequest.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                    if (typeUrlPrefix === undefined) {
+                        typeUrlPrefix = "type.googleapis.com";
+                    }
+                    return typeUrlPrefix + "/app.trainlcd.grpc.GetLineByIdListRequest";
+                };
+
+                return GetLineByIdListRequest;
             })();
 
             grpc.CoordinatesRequest = (function() {
@@ -9626,6 +9921,1458 @@ export const app = $root.app = (() => {
                 };
 
                 return Route;
+            })();
+
+            grpc.StationMinimal = (function() {
+
+                /**
+                 * Properties of a StationMinimal.
+                 * @memberof app.trainlcd.grpc
+                 * @interface IStationMinimal
+                 * @property {number|null} [id] StationMinimal id
+                 * @property {number|null} [groupId] StationMinimal groupId
+                 * @property {string|null} [name] StationMinimal name
+                 * @property {string|null} [nameKatakana] StationMinimal nameKatakana
+                 * @property {string|null} [nameRoman] StationMinimal nameRoman
+                 * @property {Array.<number>|null} [lineIds] StationMinimal lineIds
+                 * @property {Array.<app.trainlcd.grpc.IStationNumber>|null} [stationNumbers] StationMinimal stationNumbers
+                 * @property {app.trainlcd.grpc.StopCondition|null} [stopCondition] StationMinimal stopCondition
+                 * @property {boolean|null} [hasTrainTypes] StationMinimal hasTrainTypes
+                 * @property {number|null} [trainTypeId] StationMinimal trainTypeId
+                 */
+
+                /**
+                 * Constructs a new StationMinimal.
+                 * @memberof app.trainlcd.grpc
+                 * @classdesc Represents a StationMinimal.
+                 * @implements IStationMinimal
+                 * @constructor
+                 * @param {app.trainlcd.grpc.IStationMinimal=} [properties] Properties to set
+                 */
+                function StationMinimal(properties) {
+                    this.lineIds = [];
+                    this.stationNumbers = [];
+                    if (properties)
+                        for (let keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                            if (properties[keys[i]] != null)
+                                this[keys[i]] = properties[keys[i]];
+                }
+
+                /**
+                 * StationMinimal id.
+                 * @member {number} id
+                 * @memberof app.trainlcd.grpc.StationMinimal
+                 * @instance
+                 */
+                StationMinimal.prototype.id = 0;
+
+                /**
+                 * StationMinimal groupId.
+                 * @member {number} groupId
+                 * @memberof app.trainlcd.grpc.StationMinimal
+                 * @instance
+                 */
+                StationMinimal.prototype.groupId = 0;
+
+                /**
+                 * StationMinimal name.
+                 * @member {string} name
+                 * @memberof app.trainlcd.grpc.StationMinimal
+                 * @instance
+                 */
+                StationMinimal.prototype.name = "";
+
+                /**
+                 * StationMinimal nameKatakana.
+                 * @member {string} nameKatakana
+                 * @memberof app.trainlcd.grpc.StationMinimal
+                 * @instance
+                 */
+                StationMinimal.prototype.nameKatakana = "";
+
+                /**
+                 * StationMinimal nameRoman.
+                 * @member {string|null|undefined} nameRoman
+                 * @memberof app.trainlcd.grpc.StationMinimal
+                 * @instance
+                 */
+                StationMinimal.prototype.nameRoman = null;
+
+                /**
+                 * StationMinimal lineIds.
+                 * @member {Array.<number>} lineIds
+                 * @memberof app.trainlcd.grpc.StationMinimal
+                 * @instance
+                 */
+                StationMinimal.prototype.lineIds = $util.emptyArray;
+
+                /**
+                 * StationMinimal stationNumbers.
+                 * @member {Array.<app.trainlcd.grpc.IStationNumber>} stationNumbers
+                 * @memberof app.trainlcd.grpc.StationMinimal
+                 * @instance
+                 */
+                StationMinimal.prototype.stationNumbers = $util.emptyArray;
+
+                /**
+                 * StationMinimal stopCondition.
+                 * @member {app.trainlcd.grpc.StopCondition} stopCondition
+                 * @memberof app.trainlcd.grpc.StationMinimal
+                 * @instance
+                 */
+                StationMinimal.prototype.stopCondition = 0;
+
+                /**
+                 * StationMinimal hasTrainTypes.
+                 * @member {boolean|null|undefined} hasTrainTypes
+                 * @memberof app.trainlcd.grpc.StationMinimal
+                 * @instance
+                 */
+                StationMinimal.prototype.hasTrainTypes = null;
+
+                /**
+                 * StationMinimal trainTypeId.
+                 * @member {number|null|undefined} trainTypeId
+                 * @memberof app.trainlcd.grpc.StationMinimal
+                 * @instance
+                 */
+                StationMinimal.prototype.trainTypeId = null;
+
+                // OneOf field names bound to virtual getters and setters
+                let $oneOfFields;
+
+                /**
+                 * StationMinimal _nameRoman.
+                 * @member {"nameRoman"|undefined} _nameRoman
+                 * @memberof app.trainlcd.grpc.StationMinimal
+                 * @instance
+                 */
+                Object.defineProperty(StationMinimal.prototype, "_nameRoman", {
+                    get: $util.oneOfGetter($oneOfFields = ["nameRoman"]),
+                    set: $util.oneOfSetter($oneOfFields)
+                });
+
+                /**
+                 * StationMinimal _hasTrainTypes.
+                 * @member {"hasTrainTypes"|undefined} _hasTrainTypes
+                 * @memberof app.trainlcd.grpc.StationMinimal
+                 * @instance
+                 */
+                Object.defineProperty(StationMinimal.prototype, "_hasTrainTypes", {
+                    get: $util.oneOfGetter($oneOfFields = ["hasTrainTypes"]),
+                    set: $util.oneOfSetter($oneOfFields)
+                });
+
+                /**
+                 * StationMinimal _trainTypeId.
+                 * @member {"trainTypeId"|undefined} _trainTypeId
+                 * @memberof app.trainlcd.grpc.StationMinimal
+                 * @instance
+                 */
+                Object.defineProperty(StationMinimal.prototype, "_trainTypeId", {
+                    get: $util.oneOfGetter($oneOfFields = ["trainTypeId"]),
+                    set: $util.oneOfSetter($oneOfFields)
+                });
+
+                /**
+                 * Creates a new StationMinimal instance using the specified properties.
+                 * @function create
+                 * @memberof app.trainlcd.grpc.StationMinimal
+                 * @static
+                 * @param {app.trainlcd.grpc.IStationMinimal=} [properties] Properties to set
+                 * @returns {app.trainlcd.grpc.StationMinimal} StationMinimal instance
+                 */
+                StationMinimal.create = function create(properties) {
+                    return new StationMinimal(properties);
+                };
+
+                /**
+                 * Encodes the specified StationMinimal message. Does not implicitly {@link app.trainlcd.grpc.StationMinimal.verify|verify} messages.
+                 * @function encode
+                 * @memberof app.trainlcd.grpc.StationMinimal
+                 * @static
+                 * @param {app.trainlcd.grpc.IStationMinimal} message StationMinimal message or plain object to encode
+                 * @param {$protobuf.Writer} [writer] Writer to encode to
+                 * @returns {$protobuf.Writer} Writer
+                 */
+                StationMinimal.encode = function encode(message, writer) {
+                    if (!writer)
+                        writer = $Writer.create();
+                    if (message.id != null && Object.hasOwnProperty.call(message, "id"))
+                        writer.uint32(/* id 1, wireType 0 =*/8).uint32(message.id);
+                    if (message.groupId != null && Object.hasOwnProperty.call(message, "groupId"))
+                        writer.uint32(/* id 2, wireType 0 =*/16).uint32(message.groupId);
+                    if (message.name != null && Object.hasOwnProperty.call(message, "name"))
+                        writer.uint32(/* id 3, wireType 2 =*/26).string(message.name);
+                    if (message.nameKatakana != null && Object.hasOwnProperty.call(message, "nameKatakana"))
+                        writer.uint32(/* id 4, wireType 2 =*/34).string(message.nameKatakana);
+                    if (message.nameRoman != null && Object.hasOwnProperty.call(message, "nameRoman"))
+                        writer.uint32(/* id 5, wireType 2 =*/42).string(message.nameRoman);
+                    if (message.lineIds != null && message.lineIds.length) {
+                        writer.uint32(/* id 6, wireType 2 =*/50).fork();
+                        for (let i = 0; i < message.lineIds.length; ++i)
+                            writer.uint32(message.lineIds[i]);
+                        writer.ldelim();
+                    }
+                    if (message.stationNumbers != null && message.stationNumbers.length)
+                        for (let i = 0; i < message.stationNumbers.length; ++i)
+                            $root.app.trainlcd.grpc.StationNumber.encode(message.stationNumbers[i], writer.uint32(/* id 7, wireType 2 =*/58).fork()).ldelim();
+                    if (message.stopCondition != null && Object.hasOwnProperty.call(message, "stopCondition"))
+                        writer.uint32(/* id 8, wireType 0 =*/64).int32(message.stopCondition);
+                    if (message.hasTrainTypes != null && Object.hasOwnProperty.call(message, "hasTrainTypes"))
+                        writer.uint32(/* id 9, wireType 0 =*/72).bool(message.hasTrainTypes);
+                    if (message.trainTypeId != null && Object.hasOwnProperty.call(message, "trainTypeId"))
+                        writer.uint32(/* id 10, wireType 0 =*/80).uint32(message.trainTypeId);
+                    return writer;
+                };
+
+                /**
+                 * Encodes the specified StationMinimal message, length delimited. Does not implicitly {@link app.trainlcd.grpc.StationMinimal.verify|verify} messages.
+                 * @function encodeDelimited
+                 * @memberof app.trainlcd.grpc.StationMinimal
+                 * @static
+                 * @param {app.trainlcd.grpc.IStationMinimal} message StationMinimal message or plain object to encode
+                 * @param {$protobuf.Writer} [writer] Writer to encode to
+                 * @returns {$protobuf.Writer} Writer
+                 */
+                StationMinimal.encodeDelimited = function encodeDelimited(message, writer) {
+                    return this.encode(message, writer).ldelim();
+                };
+
+                /**
+                 * Decodes a StationMinimal message from the specified reader or buffer.
+                 * @function decode
+                 * @memberof app.trainlcd.grpc.StationMinimal
+                 * @static
+                 * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+                 * @param {number} [length] Message length if known beforehand
+                 * @returns {app.trainlcd.grpc.StationMinimal} StationMinimal
+                 * @throws {Error} If the payload is not a reader or valid buffer
+                 * @throws {$protobuf.util.ProtocolError} If required fields are missing
+                 */
+                StationMinimal.decode = function decode(reader, length, error) {
+                    if (!(reader instanceof $Reader))
+                        reader = $Reader.create(reader);
+                    let end = length === undefined ? reader.len : reader.pos + length, message = new $root.app.trainlcd.grpc.StationMinimal();
+                    while (reader.pos < end) {
+                        let tag = reader.uint32();
+                        if (tag === error)
+                            break;
+                        switch (tag >>> 3) {
+                        case 1: {
+                                message.id = reader.uint32();
+                                break;
+                            }
+                        case 2: {
+                                message.groupId = reader.uint32();
+                                break;
+                            }
+                        case 3: {
+                                message.name = reader.string();
+                                break;
+                            }
+                        case 4: {
+                                message.nameKatakana = reader.string();
+                                break;
+                            }
+                        case 5: {
+                                message.nameRoman = reader.string();
+                                break;
+                            }
+                        case 6: {
+                                if (!(message.lineIds && message.lineIds.length))
+                                    message.lineIds = [];
+                                if ((tag & 7) === 2) {
+                                    let end2 = reader.uint32() + reader.pos;
+                                    while (reader.pos < end2)
+                                        message.lineIds.push(reader.uint32());
+                                } else
+                                    message.lineIds.push(reader.uint32());
+                                break;
+                            }
+                        case 7: {
+                                if (!(message.stationNumbers && message.stationNumbers.length))
+                                    message.stationNumbers = [];
+                                message.stationNumbers.push($root.app.trainlcd.grpc.StationNumber.decode(reader, reader.uint32()));
+                                break;
+                            }
+                        case 8: {
+                                message.stopCondition = reader.int32();
+                                break;
+                            }
+                        case 9: {
+                                message.hasTrainTypes = reader.bool();
+                                break;
+                            }
+                        case 10: {
+                                message.trainTypeId = reader.uint32();
+                                break;
+                            }
+                        default:
+                            reader.skipType(tag & 7);
+                            break;
+                        }
+                    }
+                    return message;
+                };
+
+                /**
+                 * Decodes a StationMinimal message from the specified reader or buffer, length delimited.
+                 * @function decodeDelimited
+                 * @memberof app.trainlcd.grpc.StationMinimal
+                 * @static
+                 * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+                 * @returns {app.trainlcd.grpc.StationMinimal} StationMinimal
+                 * @throws {Error} If the payload is not a reader or valid buffer
+                 * @throws {$protobuf.util.ProtocolError} If required fields are missing
+                 */
+                StationMinimal.decodeDelimited = function decodeDelimited(reader) {
+                    if (!(reader instanceof $Reader))
+                        reader = new $Reader(reader);
+                    return this.decode(reader, reader.uint32());
+                };
+
+                /**
+                 * Verifies a StationMinimal message.
+                 * @function verify
+                 * @memberof app.trainlcd.grpc.StationMinimal
+                 * @static
+                 * @param {Object.<string,*>} message Plain object to verify
+                 * @returns {string|null} `null` if valid, otherwise the reason why it is not
+                 */
+                StationMinimal.verify = function verify(message) {
+                    if (typeof message !== "object" || message === null)
+                        return "object expected";
+                    let properties = {};
+                    if (message.id != null && message.hasOwnProperty("id"))
+                        if (!$util.isInteger(message.id))
+                            return "id: integer expected";
+                    if (message.groupId != null && message.hasOwnProperty("groupId"))
+                        if (!$util.isInteger(message.groupId))
+                            return "groupId: integer expected";
+                    if (message.name != null && message.hasOwnProperty("name"))
+                        if (!$util.isString(message.name))
+                            return "name: string expected";
+                    if (message.nameKatakana != null && message.hasOwnProperty("nameKatakana"))
+                        if (!$util.isString(message.nameKatakana))
+                            return "nameKatakana: string expected";
+                    if (message.nameRoman != null && message.hasOwnProperty("nameRoman")) {
+                        properties._nameRoman = 1;
+                        if (!$util.isString(message.nameRoman))
+                            return "nameRoman: string expected";
+                    }
+                    if (message.lineIds != null && message.hasOwnProperty("lineIds")) {
+                        if (!Array.isArray(message.lineIds))
+                            return "lineIds: array expected";
+                        for (let i = 0; i < message.lineIds.length; ++i)
+                            if (!$util.isInteger(message.lineIds[i]))
+                                return "lineIds: integer[] expected";
+                    }
+                    if (message.stationNumbers != null && message.hasOwnProperty("stationNumbers")) {
+                        if (!Array.isArray(message.stationNumbers))
+                            return "stationNumbers: array expected";
+                        for (let i = 0; i < message.stationNumbers.length; ++i) {
+                            let error = $root.app.trainlcd.grpc.StationNumber.verify(message.stationNumbers[i]);
+                            if (error)
+                                return "stationNumbers." + error;
+                        }
+                    }
+                    if (message.stopCondition != null && message.hasOwnProperty("stopCondition"))
+                        switch (message.stopCondition) {
+                        default:
+                            return "stopCondition: enum value expected";
+                        case 0:
+                        case 1:
+                        case 2:
+                        case 3:
+                        case 4:
+                        case 5:
+                            break;
+                        }
+                    if (message.hasTrainTypes != null && message.hasOwnProperty("hasTrainTypes")) {
+                        properties._hasTrainTypes = 1;
+                        if (typeof message.hasTrainTypes !== "boolean")
+                            return "hasTrainTypes: boolean expected";
+                    }
+                    if (message.trainTypeId != null && message.hasOwnProperty("trainTypeId")) {
+                        properties._trainTypeId = 1;
+                        if (!$util.isInteger(message.trainTypeId))
+                            return "trainTypeId: integer expected";
+                    }
+                    return null;
+                };
+
+                /**
+                 * Creates a StationMinimal message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof app.trainlcd.grpc.StationMinimal
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {app.trainlcd.grpc.StationMinimal} StationMinimal
+                 */
+                StationMinimal.fromObject = function fromObject(object) {
+                    if (object instanceof $root.app.trainlcd.grpc.StationMinimal)
+                        return object;
+                    let message = new $root.app.trainlcd.grpc.StationMinimal();
+                    if (object.id != null)
+                        message.id = object.id >>> 0;
+                    if (object.groupId != null)
+                        message.groupId = object.groupId >>> 0;
+                    if (object.name != null)
+                        message.name = String(object.name);
+                    if (object.nameKatakana != null)
+                        message.nameKatakana = String(object.nameKatakana);
+                    if (object.nameRoman != null)
+                        message.nameRoman = String(object.nameRoman);
+                    if (object.lineIds) {
+                        if (!Array.isArray(object.lineIds))
+                            throw TypeError(".app.trainlcd.grpc.StationMinimal.lineIds: array expected");
+                        message.lineIds = [];
+                        for (let i = 0; i < object.lineIds.length; ++i)
+                            message.lineIds[i] = object.lineIds[i] >>> 0;
+                    }
+                    if (object.stationNumbers) {
+                        if (!Array.isArray(object.stationNumbers))
+                            throw TypeError(".app.trainlcd.grpc.StationMinimal.stationNumbers: array expected");
+                        message.stationNumbers = [];
+                        for (let i = 0; i < object.stationNumbers.length; ++i) {
+                            if (typeof object.stationNumbers[i] !== "object")
+                                throw TypeError(".app.trainlcd.grpc.StationMinimal.stationNumbers: object expected");
+                            message.stationNumbers[i] = $root.app.trainlcd.grpc.StationNumber.fromObject(object.stationNumbers[i]);
+                        }
+                    }
+                    switch (object.stopCondition) {
+                    default:
+                        if (typeof object.stopCondition === "number") {
+                            message.stopCondition = object.stopCondition;
+                            break;
+                        }
+                        break;
+                    case "All":
+                    case 0:
+                        message.stopCondition = 0;
+                        break;
+                    case "Not":
+                    case 1:
+                        message.stopCondition = 1;
+                        break;
+                    case "Partial":
+                    case 2:
+                        message.stopCondition = 2;
+                        break;
+                    case "Weekday":
+                    case 3:
+                        message.stopCondition = 3;
+                        break;
+                    case "Holiday":
+                    case 4:
+                        message.stopCondition = 4;
+                        break;
+                    case "PartialStop":
+                    case 5:
+                        message.stopCondition = 5;
+                        break;
+                    }
+                    if (object.hasTrainTypes != null)
+                        message.hasTrainTypes = Boolean(object.hasTrainTypes);
+                    if (object.trainTypeId != null)
+                        message.trainTypeId = object.trainTypeId >>> 0;
+                    return message;
+                };
+
+                /**
+                 * Creates a plain object from a StationMinimal message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof app.trainlcd.grpc.StationMinimal
+                 * @static
+                 * @param {app.trainlcd.grpc.StationMinimal} message StationMinimal
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                StationMinimal.toObject = function toObject(message, options) {
+                    if (!options)
+                        options = {};
+                    let object = {};
+                    if (options.arrays || options.defaults) {
+                        object.lineIds = [];
+                        object.stationNumbers = [];
+                    }
+                    if (options.defaults) {
+                        object.id = 0;
+                        object.groupId = 0;
+                        object.name = "";
+                        object.nameKatakana = "";
+                        object.stopCondition = options.enums === String ? "All" : 0;
+                    }
+                    if (message.id != null && message.hasOwnProperty("id"))
+                        object.id = message.id;
+                    if (message.groupId != null && message.hasOwnProperty("groupId"))
+                        object.groupId = message.groupId;
+                    if (message.name != null && message.hasOwnProperty("name"))
+                        object.name = message.name;
+                    if (message.nameKatakana != null && message.hasOwnProperty("nameKatakana"))
+                        object.nameKatakana = message.nameKatakana;
+                    if (message.nameRoman != null && message.hasOwnProperty("nameRoman")) {
+                        object.nameRoman = message.nameRoman;
+                        if (options.oneofs)
+                            object._nameRoman = "nameRoman";
+                    }
+                    if (message.lineIds && message.lineIds.length) {
+                        object.lineIds = [];
+                        for (let j = 0; j < message.lineIds.length; ++j)
+                            object.lineIds[j] = message.lineIds[j];
+                    }
+                    if (message.stationNumbers && message.stationNumbers.length) {
+                        object.stationNumbers = [];
+                        for (let j = 0; j < message.stationNumbers.length; ++j)
+                            object.stationNumbers[j] = $root.app.trainlcd.grpc.StationNumber.toObject(message.stationNumbers[j], options);
+                    }
+                    if (message.stopCondition != null && message.hasOwnProperty("stopCondition"))
+                        object.stopCondition = options.enums === String ? $root.app.trainlcd.grpc.StopCondition[message.stopCondition] === undefined ? message.stopCondition : $root.app.trainlcd.grpc.StopCondition[message.stopCondition] : message.stopCondition;
+                    if (message.hasTrainTypes != null && message.hasOwnProperty("hasTrainTypes")) {
+                        object.hasTrainTypes = message.hasTrainTypes;
+                        if (options.oneofs)
+                            object._hasTrainTypes = "hasTrainTypes";
+                    }
+                    if (message.trainTypeId != null && message.hasOwnProperty("trainTypeId")) {
+                        object.trainTypeId = message.trainTypeId;
+                        if (options.oneofs)
+                            object._trainTypeId = "trainTypeId";
+                    }
+                    return object;
+                };
+
+                /**
+                 * Converts this StationMinimal to JSON.
+                 * @function toJSON
+                 * @memberof app.trainlcd.grpc.StationMinimal
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                StationMinimal.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
+
+                /**
+                 * Gets the default type url for StationMinimal
+                 * @function getTypeUrl
+                 * @memberof app.trainlcd.grpc.StationMinimal
+                 * @static
+                 * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns {string} The default type url
+                 */
+                StationMinimal.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                    if (typeUrlPrefix === undefined) {
+                        typeUrlPrefix = "type.googleapis.com";
+                    }
+                    return typeUrlPrefix + "/app.trainlcd.grpc.StationMinimal";
+                };
+
+                return StationMinimal;
+            })();
+
+            grpc.LineMinimal = (function() {
+
+                /**
+                 * Properties of a LineMinimal.
+                 * @memberof app.trainlcd.grpc
+                 * @interface ILineMinimal
+                 * @property {number|null} [id] LineMinimal id
+                 * @property {string|null} [nameShort] LineMinimal nameShort
+                 * @property {string|null} [color] LineMinimal color
+                 * @property {app.trainlcd.grpc.LineType|null} [lineType] LineMinimal lineType
+                 * @property {Array.<app.trainlcd.grpc.ILineSymbol>|null} [lineSymbols] LineMinimal lineSymbols
+                 */
+
+                /**
+                 * Constructs a new LineMinimal.
+                 * @memberof app.trainlcd.grpc
+                 * @classdesc Represents a LineMinimal.
+                 * @implements ILineMinimal
+                 * @constructor
+                 * @param {app.trainlcd.grpc.ILineMinimal=} [properties] Properties to set
+                 */
+                function LineMinimal(properties) {
+                    this.lineSymbols = [];
+                    if (properties)
+                        for (let keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                            if (properties[keys[i]] != null)
+                                this[keys[i]] = properties[keys[i]];
+                }
+
+                /**
+                 * LineMinimal id.
+                 * @member {number} id
+                 * @memberof app.trainlcd.grpc.LineMinimal
+                 * @instance
+                 */
+                LineMinimal.prototype.id = 0;
+
+                /**
+                 * LineMinimal nameShort.
+                 * @member {string} nameShort
+                 * @memberof app.trainlcd.grpc.LineMinimal
+                 * @instance
+                 */
+                LineMinimal.prototype.nameShort = "";
+
+                /**
+                 * LineMinimal color.
+                 * @member {string} color
+                 * @memberof app.trainlcd.grpc.LineMinimal
+                 * @instance
+                 */
+                LineMinimal.prototype.color = "";
+
+                /**
+                 * LineMinimal lineType.
+                 * @member {app.trainlcd.grpc.LineType} lineType
+                 * @memberof app.trainlcd.grpc.LineMinimal
+                 * @instance
+                 */
+                LineMinimal.prototype.lineType = 0;
+
+                /**
+                 * LineMinimal lineSymbols.
+                 * @member {Array.<app.trainlcd.grpc.ILineSymbol>} lineSymbols
+                 * @memberof app.trainlcd.grpc.LineMinimal
+                 * @instance
+                 */
+                LineMinimal.prototype.lineSymbols = $util.emptyArray;
+
+                /**
+                 * Creates a new LineMinimal instance using the specified properties.
+                 * @function create
+                 * @memberof app.trainlcd.grpc.LineMinimal
+                 * @static
+                 * @param {app.trainlcd.grpc.ILineMinimal=} [properties] Properties to set
+                 * @returns {app.trainlcd.grpc.LineMinimal} LineMinimal instance
+                 */
+                LineMinimal.create = function create(properties) {
+                    return new LineMinimal(properties);
+                };
+
+                /**
+                 * Encodes the specified LineMinimal message. Does not implicitly {@link app.trainlcd.grpc.LineMinimal.verify|verify} messages.
+                 * @function encode
+                 * @memberof app.trainlcd.grpc.LineMinimal
+                 * @static
+                 * @param {app.trainlcd.grpc.ILineMinimal} message LineMinimal message or plain object to encode
+                 * @param {$protobuf.Writer} [writer] Writer to encode to
+                 * @returns {$protobuf.Writer} Writer
+                 */
+                LineMinimal.encode = function encode(message, writer) {
+                    if (!writer)
+                        writer = $Writer.create();
+                    if (message.id != null && Object.hasOwnProperty.call(message, "id"))
+                        writer.uint32(/* id 1, wireType 0 =*/8).uint32(message.id);
+                    if (message.nameShort != null && Object.hasOwnProperty.call(message, "nameShort"))
+                        writer.uint32(/* id 2, wireType 2 =*/18).string(message.nameShort);
+                    if (message.color != null && Object.hasOwnProperty.call(message, "color"))
+                        writer.uint32(/* id 3, wireType 2 =*/26).string(message.color);
+                    if (message.lineType != null && Object.hasOwnProperty.call(message, "lineType"))
+                        writer.uint32(/* id 4, wireType 0 =*/32).int32(message.lineType);
+                    if (message.lineSymbols != null && message.lineSymbols.length)
+                        for (let i = 0; i < message.lineSymbols.length; ++i)
+                            $root.app.trainlcd.grpc.LineSymbol.encode(message.lineSymbols[i], writer.uint32(/* id 5, wireType 2 =*/42).fork()).ldelim();
+                    return writer;
+                };
+
+                /**
+                 * Encodes the specified LineMinimal message, length delimited. Does not implicitly {@link app.trainlcd.grpc.LineMinimal.verify|verify} messages.
+                 * @function encodeDelimited
+                 * @memberof app.trainlcd.grpc.LineMinimal
+                 * @static
+                 * @param {app.trainlcd.grpc.ILineMinimal} message LineMinimal message or plain object to encode
+                 * @param {$protobuf.Writer} [writer] Writer to encode to
+                 * @returns {$protobuf.Writer} Writer
+                 */
+                LineMinimal.encodeDelimited = function encodeDelimited(message, writer) {
+                    return this.encode(message, writer).ldelim();
+                };
+
+                /**
+                 * Decodes a LineMinimal message from the specified reader or buffer.
+                 * @function decode
+                 * @memberof app.trainlcd.grpc.LineMinimal
+                 * @static
+                 * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+                 * @param {number} [length] Message length if known beforehand
+                 * @returns {app.trainlcd.grpc.LineMinimal} LineMinimal
+                 * @throws {Error} If the payload is not a reader or valid buffer
+                 * @throws {$protobuf.util.ProtocolError} If required fields are missing
+                 */
+                LineMinimal.decode = function decode(reader, length, error) {
+                    if (!(reader instanceof $Reader))
+                        reader = $Reader.create(reader);
+                    let end = length === undefined ? reader.len : reader.pos + length, message = new $root.app.trainlcd.grpc.LineMinimal();
+                    while (reader.pos < end) {
+                        let tag = reader.uint32();
+                        if (tag === error)
+                            break;
+                        switch (tag >>> 3) {
+                        case 1: {
+                                message.id = reader.uint32();
+                                break;
+                            }
+                        case 2: {
+                                message.nameShort = reader.string();
+                                break;
+                            }
+                        case 3: {
+                                message.color = reader.string();
+                                break;
+                            }
+                        case 4: {
+                                message.lineType = reader.int32();
+                                break;
+                            }
+                        case 5: {
+                                if (!(message.lineSymbols && message.lineSymbols.length))
+                                    message.lineSymbols = [];
+                                message.lineSymbols.push($root.app.trainlcd.grpc.LineSymbol.decode(reader, reader.uint32()));
+                                break;
+                            }
+                        default:
+                            reader.skipType(tag & 7);
+                            break;
+                        }
+                    }
+                    return message;
+                };
+
+                /**
+                 * Decodes a LineMinimal message from the specified reader or buffer, length delimited.
+                 * @function decodeDelimited
+                 * @memberof app.trainlcd.grpc.LineMinimal
+                 * @static
+                 * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+                 * @returns {app.trainlcd.grpc.LineMinimal} LineMinimal
+                 * @throws {Error} If the payload is not a reader or valid buffer
+                 * @throws {$protobuf.util.ProtocolError} If required fields are missing
+                 */
+                LineMinimal.decodeDelimited = function decodeDelimited(reader) {
+                    if (!(reader instanceof $Reader))
+                        reader = new $Reader(reader);
+                    return this.decode(reader, reader.uint32());
+                };
+
+                /**
+                 * Verifies a LineMinimal message.
+                 * @function verify
+                 * @memberof app.trainlcd.grpc.LineMinimal
+                 * @static
+                 * @param {Object.<string,*>} message Plain object to verify
+                 * @returns {string|null} `null` if valid, otherwise the reason why it is not
+                 */
+                LineMinimal.verify = function verify(message) {
+                    if (typeof message !== "object" || message === null)
+                        return "object expected";
+                    if (message.id != null && message.hasOwnProperty("id"))
+                        if (!$util.isInteger(message.id))
+                            return "id: integer expected";
+                    if (message.nameShort != null && message.hasOwnProperty("nameShort"))
+                        if (!$util.isString(message.nameShort))
+                            return "nameShort: string expected";
+                    if (message.color != null && message.hasOwnProperty("color"))
+                        if (!$util.isString(message.color))
+                            return "color: string expected";
+                    if (message.lineType != null && message.hasOwnProperty("lineType"))
+                        switch (message.lineType) {
+                        default:
+                            return "lineType: enum value expected";
+                        case 0:
+                        case 1:
+                        case 2:
+                        case 3:
+                        case 4:
+                        case 5:
+                            break;
+                        }
+                    if (message.lineSymbols != null && message.hasOwnProperty("lineSymbols")) {
+                        if (!Array.isArray(message.lineSymbols))
+                            return "lineSymbols: array expected";
+                        for (let i = 0; i < message.lineSymbols.length; ++i) {
+                            let error = $root.app.trainlcd.grpc.LineSymbol.verify(message.lineSymbols[i]);
+                            if (error)
+                                return "lineSymbols." + error;
+                        }
+                    }
+                    return null;
+                };
+
+                /**
+                 * Creates a LineMinimal message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof app.trainlcd.grpc.LineMinimal
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {app.trainlcd.grpc.LineMinimal} LineMinimal
+                 */
+                LineMinimal.fromObject = function fromObject(object) {
+                    if (object instanceof $root.app.trainlcd.grpc.LineMinimal)
+                        return object;
+                    let message = new $root.app.trainlcd.grpc.LineMinimal();
+                    if (object.id != null)
+                        message.id = object.id >>> 0;
+                    if (object.nameShort != null)
+                        message.nameShort = String(object.nameShort);
+                    if (object.color != null)
+                        message.color = String(object.color);
+                    switch (object.lineType) {
+                    default:
+                        if (typeof object.lineType === "number") {
+                            message.lineType = object.lineType;
+                            break;
+                        }
+                        break;
+                    case "OtherLineType":
+                    case 0:
+                        message.lineType = 0;
+                        break;
+                    case "BulletTrain":
+                    case 1:
+                        message.lineType = 1;
+                        break;
+                    case "Normal":
+                    case 2:
+                        message.lineType = 2;
+                        break;
+                    case "Subway":
+                    case 3:
+                        message.lineType = 3;
+                        break;
+                    case "Tram":
+                    case 4:
+                        message.lineType = 4;
+                        break;
+                    case "MonorailOrAGT":
+                    case 5:
+                        message.lineType = 5;
+                        break;
+                    }
+                    if (object.lineSymbols) {
+                        if (!Array.isArray(object.lineSymbols))
+                            throw TypeError(".app.trainlcd.grpc.LineMinimal.lineSymbols: array expected");
+                        message.lineSymbols = [];
+                        for (let i = 0; i < object.lineSymbols.length; ++i) {
+                            if (typeof object.lineSymbols[i] !== "object")
+                                throw TypeError(".app.trainlcd.grpc.LineMinimal.lineSymbols: object expected");
+                            message.lineSymbols[i] = $root.app.trainlcd.grpc.LineSymbol.fromObject(object.lineSymbols[i]);
+                        }
+                    }
+                    return message;
+                };
+
+                /**
+                 * Creates a plain object from a LineMinimal message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof app.trainlcd.grpc.LineMinimal
+                 * @static
+                 * @param {app.trainlcd.grpc.LineMinimal} message LineMinimal
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                LineMinimal.toObject = function toObject(message, options) {
+                    if (!options)
+                        options = {};
+                    let object = {};
+                    if (options.arrays || options.defaults)
+                        object.lineSymbols = [];
+                    if (options.defaults) {
+                        object.id = 0;
+                        object.nameShort = "";
+                        object.color = "";
+                        object.lineType = options.enums === String ? "OtherLineType" : 0;
+                    }
+                    if (message.id != null && message.hasOwnProperty("id"))
+                        object.id = message.id;
+                    if (message.nameShort != null && message.hasOwnProperty("nameShort"))
+                        object.nameShort = message.nameShort;
+                    if (message.color != null && message.hasOwnProperty("color"))
+                        object.color = message.color;
+                    if (message.lineType != null && message.hasOwnProperty("lineType"))
+                        object.lineType = options.enums === String ? $root.app.trainlcd.grpc.LineType[message.lineType] === undefined ? message.lineType : $root.app.trainlcd.grpc.LineType[message.lineType] : message.lineType;
+                    if (message.lineSymbols && message.lineSymbols.length) {
+                        object.lineSymbols = [];
+                        for (let j = 0; j < message.lineSymbols.length; ++j)
+                            object.lineSymbols[j] = $root.app.trainlcd.grpc.LineSymbol.toObject(message.lineSymbols[j], options);
+                    }
+                    return object;
+                };
+
+                /**
+                 * Converts this LineMinimal to JSON.
+                 * @function toJSON
+                 * @memberof app.trainlcd.grpc.LineMinimal
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                LineMinimal.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
+
+                /**
+                 * Gets the default type url for LineMinimal
+                 * @function getTypeUrl
+                 * @memberof app.trainlcd.grpc.LineMinimal
+                 * @static
+                 * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns {string} The default type url
+                 */
+                LineMinimal.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                    if (typeUrlPrefix === undefined) {
+                        typeUrlPrefix = "type.googleapis.com";
+                    }
+                    return typeUrlPrefix + "/app.trainlcd.grpc.LineMinimal";
+                };
+
+                return LineMinimal;
+            })();
+
+            grpc.RouteMinimal = (function() {
+
+                /**
+                 * Properties of a RouteMinimal.
+                 * @memberof app.trainlcd.grpc
+                 * @interface IRouteMinimal
+                 * @property {number|null} [id] RouteMinimal id
+                 * @property {Array.<app.trainlcd.grpc.IStationMinimal>|null} [stops] RouteMinimal stops
+                 */
+
+                /**
+                 * Constructs a new RouteMinimal.
+                 * @memberof app.trainlcd.grpc
+                 * @classdesc Represents a RouteMinimal.
+                 * @implements IRouteMinimal
+                 * @constructor
+                 * @param {app.trainlcd.grpc.IRouteMinimal=} [properties] Properties to set
+                 */
+                function RouteMinimal(properties) {
+                    this.stops = [];
+                    if (properties)
+                        for (let keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                            if (properties[keys[i]] != null)
+                                this[keys[i]] = properties[keys[i]];
+                }
+
+                /**
+                 * RouteMinimal id.
+                 * @member {number} id
+                 * @memberof app.trainlcd.grpc.RouteMinimal
+                 * @instance
+                 */
+                RouteMinimal.prototype.id = 0;
+
+                /**
+                 * RouteMinimal stops.
+                 * @member {Array.<app.trainlcd.grpc.IStationMinimal>} stops
+                 * @memberof app.trainlcd.grpc.RouteMinimal
+                 * @instance
+                 */
+                RouteMinimal.prototype.stops = $util.emptyArray;
+
+                /**
+                 * Creates a new RouteMinimal instance using the specified properties.
+                 * @function create
+                 * @memberof app.trainlcd.grpc.RouteMinimal
+                 * @static
+                 * @param {app.trainlcd.grpc.IRouteMinimal=} [properties] Properties to set
+                 * @returns {app.trainlcd.grpc.RouteMinimal} RouteMinimal instance
+                 */
+                RouteMinimal.create = function create(properties) {
+                    return new RouteMinimal(properties);
+                };
+
+                /**
+                 * Encodes the specified RouteMinimal message. Does not implicitly {@link app.trainlcd.grpc.RouteMinimal.verify|verify} messages.
+                 * @function encode
+                 * @memberof app.trainlcd.grpc.RouteMinimal
+                 * @static
+                 * @param {app.trainlcd.grpc.IRouteMinimal} message RouteMinimal message or plain object to encode
+                 * @param {$protobuf.Writer} [writer] Writer to encode to
+                 * @returns {$protobuf.Writer} Writer
+                 */
+                RouteMinimal.encode = function encode(message, writer) {
+                    if (!writer)
+                        writer = $Writer.create();
+                    if (message.id != null && Object.hasOwnProperty.call(message, "id"))
+                        writer.uint32(/* id 1, wireType 0 =*/8).uint32(message.id);
+                    if (message.stops != null && message.stops.length)
+                        for (let i = 0; i < message.stops.length; ++i)
+                            $root.app.trainlcd.grpc.StationMinimal.encode(message.stops[i], writer.uint32(/* id 2, wireType 2 =*/18).fork()).ldelim();
+                    return writer;
+                };
+
+                /**
+                 * Encodes the specified RouteMinimal message, length delimited. Does not implicitly {@link app.trainlcd.grpc.RouteMinimal.verify|verify} messages.
+                 * @function encodeDelimited
+                 * @memberof app.trainlcd.grpc.RouteMinimal
+                 * @static
+                 * @param {app.trainlcd.grpc.IRouteMinimal} message RouteMinimal message or plain object to encode
+                 * @param {$protobuf.Writer} [writer] Writer to encode to
+                 * @returns {$protobuf.Writer} Writer
+                 */
+                RouteMinimal.encodeDelimited = function encodeDelimited(message, writer) {
+                    return this.encode(message, writer).ldelim();
+                };
+
+                /**
+                 * Decodes a RouteMinimal message from the specified reader or buffer.
+                 * @function decode
+                 * @memberof app.trainlcd.grpc.RouteMinimal
+                 * @static
+                 * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+                 * @param {number} [length] Message length if known beforehand
+                 * @returns {app.trainlcd.grpc.RouteMinimal} RouteMinimal
+                 * @throws {Error} If the payload is not a reader or valid buffer
+                 * @throws {$protobuf.util.ProtocolError} If required fields are missing
+                 */
+                RouteMinimal.decode = function decode(reader, length, error) {
+                    if (!(reader instanceof $Reader))
+                        reader = $Reader.create(reader);
+                    let end = length === undefined ? reader.len : reader.pos + length, message = new $root.app.trainlcd.grpc.RouteMinimal();
+                    while (reader.pos < end) {
+                        let tag = reader.uint32();
+                        if (tag === error)
+                            break;
+                        switch (tag >>> 3) {
+                        case 1: {
+                                message.id = reader.uint32();
+                                break;
+                            }
+                        case 2: {
+                                if (!(message.stops && message.stops.length))
+                                    message.stops = [];
+                                message.stops.push($root.app.trainlcd.grpc.StationMinimal.decode(reader, reader.uint32()));
+                                break;
+                            }
+                        default:
+                            reader.skipType(tag & 7);
+                            break;
+                        }
+                    }
+                    return message;
+                };
+
+                /**
+                 * Decodes a RouteMinimal message from the specified reader or buffer, length delimited.
+                 * @function decodeDelimited
+                 * @memberof app.trainlcd.grpc.RouteMinimal
+                 * @static
+                 * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+                 * @returns {app.trainlcd.grpc.RouteMinimal} RouteMinimal
+                 * @throws {Error} If the payload is not a reader or valid buffer
+                 * @throws {$protobuf.util.ProtocolError} If required fields are missing
+                 */
+                RouteMinimal.decodeDelimited = function decodeDelimited(reader) {
+                    if (!(reader instanceof $Reader))
+                        reader = new $Reader(reader);
+                    return this.decode(reader, reader.uint32());
+                };
+
+                /**
+                 * Verifies a RouteMinimal message.
+                 * @function verify
+                 * @memberof app.trainlcd.grpc.RouteMinimal
+                 * @static
+                 * @param {Object.<string,*>} message Plain object to verify
+                 * @returns {string|null} `null` if valid, otherwise the reason why it is not
+                 */
+                RouteMinimal.verify = function verify(message) {
+                    if (typeof message !== "object" || message === null)
+                        return "object expected";
+                    if (message.id != null && message.hasOwnProperty("id"))
+                        if (!$util.isInteger(message.id))
+                            return "id: integer expected";
+                    if (message.stops != null && message.hasOwnProperty("stops")) {
+                        if (!Array.isArray(message.stops))
+                            return "stops: array expected";
+                        for (let i = 0; i < message.stops.length; ++i) {
+                            let error = $root.app.trainlcd.grpc.StationMinimal.verify(message.stops[i]);
+                            if (error)
+                                return "stops." + error;
+                        }
+                    }
+                    return null;
+                };
+
+                /**
+                 * Creates a RouteMinimal message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof app.trainlcd.grpc.RouteMinimal
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {app.trainlcd.grpc.RouteMinimal} RouteMinimal
+                 */
+                RouteMinimal.fromObject = function fromObject(object) {
+                    if (object instanceof $root.app.trainlcd.grpc.RouteMinimal)
+                        return object;
+                    let message = new $root.app.trainlcd.grpc.RouteMinimal();
+                    if (object.id != null)
+                        message.id = object.id >>> 0;
+                    if (object.stops) {
+                        if (!Array.isArray(object.stops))
+                            throw TypeError(".app.trainlcd.grpc.RouteMinimal.stops: array expected");
+                        message.stops = [];
+                        for (let i = 0; i < object.stops.length; ++i) {
+                            if (typeof object.stops[i] !== "object")
+                                throw TypeError(".app.trainlcd.grpc.RouteMinimal.stops: object expected");
+                            message.stops[i] = $root.app.trainlcd.grpc.StationMinimal.fromObject(object.stops[i]);
+                        }
+                    }
+                    return message;
+                };
+
+                /**
+                 * Creates a plain object from a RouteMinimal message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof app.trainlcd.grpc.RouteMinimal
+                 * @static
+                 * @param {app.trainlcd.grpc.RouteMinimal} message RouteMinimal
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                RouteMinimal.toObject = function toObject(message, options) {
+                    if (!options)
+                        options = {};
+                    let object = {};
+                    if (options.arrays || options.defaults)
+                        object.stops = [];
+                    if (options.defaults)
+                        object.id = 0;
+                    if (message.id != null && message.hasOwnProperty("id"))
+                        object.id = message.id;
+                    if (message.stops && message.stops.length) {
+                        object.stops = [];
+                        for (let j = 0; j < message.stops.length; ++j)
+                            object.stops[j] = $root.app.trainlcd.grpc.StationMinimal.toObject(message.stops[j], options);
+                    }
+                    return object;
+                };
+
+                /**
+                 * Converts this RouteMinimal to JSON.
+                 * @function toJSON
+                 * @memberof app.trainlcd.grpc.RouteMinimal
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                RouteMinimal.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
+
+                /**
+                 * Gets the default type url for RouteMinimal
+                 * @function getTypeUrl
+                 * @memberof app.trainlcd.grpc.RouteMinimal
+                 * @static
+                 * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns {string} The default type url
+                 */
+                RouteMinimal.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                    if (typeUrlPrefix === undefined) {
+                        typeUrlPrefix = "type.googleapis.com";
+                    }
+                    return typeUrlPrefix + "/app.trainlcd.grpc.RouteMinimal";
+                };
+
+                return RouteMinimal;
+            })();
+
+            grpc.RouteMinimalResponse = (function() {
+
+                /**
+                 * Properties of a RouteMinimalResponse.
+                 * @memberof app.trainlcd.grpc
+                 * @interface IRouteMinimalResponse
+                 * @property {Array.<app.trainlcd.grpc.IRouteMinimal>|null} [routes] RouteMinimalResponse routes
+                 * @property {Array.<app.trainlcd.grpc.ILineMinimal>|null} [lines] RouteMinimalResponse lines
+                 * @property {string|null} [nextPageToken] RouteMinimalResponse nextPageToken
+                 */
+
+                /**
+                 * Constructs a new RouteMinimalResponse.
+                 * @memberof app.trainlcd.grpc
+                 * @classdesc Represents a RouteMinimalResponse.
+                 * @implements IRouteMinimalResponse
+                 * @constructor
+                 * @param {app.trainlcd.grpc.IRouteMinimalResponse=} [properties] Properties to set
+                 */
+                function RouteMinimalResponse(properties) {
+                    this.routes = [];
+                    this.lines = [];
+                    if (properties)
+                        for (let keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                            if (properties[keys[i]] != null)
+                                this[keys[i]] = properties[keys[i]];
+                }
+
+                /**
+                 * RouteMinimalResponse routes.
+                 * @member {Array.<app.trainlcd.grpc.IRouteMinimal>} routes
+                 * @memberof app.trainlcd.grpc.RouteMinimalResponse
+                 * @instance
+                 */
+                RouteMinimalResponse.prototype.routes = $util.emptyArray;
+
+                /**
+                 * RouteMinimalResponse lines.
+                 * @member {Array.<app.trainlcd.grpc.ILineMinimal>} lines
+                 * @memberof app.trainlcd.grpc.RouteMinimalResponse
+                 * @instance
+                 */
+                RouteMinimalResponse.prototype.lines = $util.emptyArray;
+
+                /**
+                 * RouteMinimalResponse nextPageToken.
+                 * @member {string} nextPageToken
+                 * @memberof app.trainlcd.grpc.RouteMinimalResponse
+                 * @instance
+                 */
+                RouteMinimalResponse.prototype.nextPageToken = "";
+
+                /**
+                 * Creates a new RouteMinimalResponse instance using the specified properties.
+                 * @function create
+                 * @memberof app.trainlcd.grpc.RouteMinimalResponse
+                 * @static
+                 * @param {app.trainlcd.grpc.IRouteMinimalResponse=} [properties] Properties to set
+                 * @returns {app.trainlcd.grpc.RouteMinimalResponse} RouteMinimalResponse instance
+                 */
+                RouteMinimalResponse.create = function create(properties) {
+                    return new RouteMinimalResponse(properties);
+                };
+
+                /**
+                 * Encodes the specified RouteMinimalResponse message. Does not implicitly {@link app.trainlcd.grpc.RouteMinimalResponse.verify|verify} messages.
+                 * @function encode
+                 * @memberof app.trainlcd.grpc.RouteMinimalResponse
+                 * @static
+                 * @param {app.trainlcd.grpc.IRouteMinimalResponse} message RouteMinimalResponse message or plain object to encode
+                 * @param {$protobuf.Writer} [writer] Writer to encode to
+                 * @returns {$protobuf.Writer} Writer
+                 */
+                RouteMinimalResponse.encode = function encode(message, writer) {
+                    if (!writer)
+                        writer = $Writer.create();
+                    if (message.routes != null && message.routes.length)
+                        for (let i = 0; i < message.routes.length; ++i)
+                            $root.app.trainlcd.grpc.RouteMinimal.encode(message.routes[i], writer.uint32(/* id 1, wireType 2 =*/10).fork()).ldelim();
+                    if (message.lines != null && message.lines.length)
+                        for (let i = 0; i < message.lines.length; ++i)
+                            $root.app.trainlcd.grpc.LineMinimal.encode(message.lines[i], writer.uint32(/* id 2, wireType 2 =*/18).fork()).ldelim();
+                    if (message.nextPageToken != null && Object.hasOwnProperty.call(message, "nextPageToken"))
+                        writer.uint32(/* id 3, wireType 2 =*/26).string(message.nextPageToken);
+                    return writer;
+                };
+
+                /**
+                 * Encodes the specified RouteMinimalResponse message, length delimited. Does not implicitly {@link app.trainlcd.grpc.RouteMinimalResponse.verify|verify} messages.
+                 * @function encodeDelimited
+                 * @memberof app.trainlcd.grpc.RouteMinimalResponse
+                 * @static
+                 * @param {app.trainlcd.grpc.IRouteMinimalResponse} message RouteMinimalResponse message or plain object to encode
+                 * @param {$protobuf.Writer} [writer] Writer to encode to
+                 * @returns {$protobuf.Writer} Writer
+                 */
+                RouteMinimalResponse.encodeDelimited = function encodeDelimited(message, writer) {
+                    return this.encode(message, writer).ldelim();
+                };
+
+                /**
+                 * Decodes a RouteMinimalResponse message from the specified reader or buffer.
+                 * @function decode
+                 * @memberof app.trainlcd.grpc.RouteMinimalResponse
+                 * @static
+                 * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+                 * @param {number} [length] Message length if known beforehand
+                 * @returns {app.trainlcd.grpc.RouteMinimalResponse} RouteMinimalResponse
+                 * @throws {Error} If the payload is not a reader or valid buffer
+                 * @throws {$protobuf.util.ProtocolError} If required fields are missing
+                 */
+                RouteMinimalResponse.decode = function decode(reader, length, error) {
+                    if (!(reader instanceof $Reader))
+                        reader = $Reader.create(reader);
+                    let end = length === undefined ? reader.len : reader.pos + length, message = new $root.app.trainlcd.grpc.RouteMinimalResponse();
+                    while (reader.pos < end) {
+                        let tag = reader.uint32();
+                        if (tag === error)
+                            break;
+                        switch (tag >>> 3) {
+                        case 1: {
+                                if (!(message.routes && message.routes.length))
+                                    message.routes = [];
+                                message.routes.push($root.app.trainlcd.grpc.RouteMinimal.decode(reader, reader.uint32()));
+                                break;
+                            }
+                        case 2: {
+                                if (!(message.lines && message.lines.length))
+                                    message.lines = [];
+                                message.lines.push($root.app.trainlcd.grpc.LineMinimal.decode(reader, reader.uint32()));
+                                break;
+                            }
+                        case 3: {
+                                message.nextPageToken = reader.string();
+                                break;
+                            }
+                        default:
+                            reader.skipType(tag & 7);
+                            break;
+                        }
+                    }
+                    return message;
+                };
+
+                /**
+                 * Decodes a RouteMinimalResponse message from the specified reader or buffer, length delimited.
+                 * @function decodeDelimited
+                 * @memberof app.trainlcd.grpc.RouteMinimalResponse
+                 * @static
+                 * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+                 * @returns {app.trainlcd.grpc.RouteMinimalResponse} RouteMinimalResponse
+                 * @throws {Error} If the payload is not a reader or valid buffer
+                 * @throws {$protobuf.util.ProtocolError} If required fields are missing
+                 */
+                RouteMinimalResponse.decodeDelimited = function decodeDelimited(reader) {
+                    if (!(reader instanceof $Reader))
+                        reader = new $Reader(reader);
+                    return this.decode(reader, reader.uint32());
+                };
+
+                /**
+                 * Verifies a RouteMinimalResponse message.
+                 * @function verify
+                 * @memberof app.trainlcd.grpc.RouteMinimalResponse
+                 * @static
+                 * @param {Object.<string,*>} message Plain object to verify
+                 * @returns {string|null} `null` if valid, otherwise the reason why it is not
+                 */
+                RouteMinimalResponse.verify = function verify(message) {
+                    if (typeof message !== "object" || message === null)
+                        return "object expected";
+                    if (message.routes != null && message.hasOwnProperty("routes")) {
+                        if (!Array.isArray(message.routes))
+                            return "routes: array expected";
+                        for (let i = 0; i < message.routes.length; ++i) {
+                            let error = $root.app.trainlcd.grpc.RouteMinimal.verify(message.routes[i]);
+                            if (error)
+                                return "routes." + error;
+                        }
+                    }
+                    if (message.lines != null && message.hasOwnProperty("lines")) {
+                        if (!Array.isArray(message.lines))
+                            return "lines: array expected";
+                        for (let i = 0; i < message.lines.length; ++i) {
+                            let error = $root.app.trainlcd.grpc.LineMinimal.verify(message.lines[i]);
+                            if (error)
+                                return "lines." + error;
+                        }
+                    }
+                    if (message.nextPageToken != null && message.hasOwnProperty("nextPageToken"))
+                        if (!$util.isString(message.nextPageToken))
+                            return "nextPageToken: string expected";
+                    return null;
+                };
+
+                /**
+                 * Creates a RouteMinimalResponse message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof app.trainlcd.grpc.RouteMinimalResponse
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {app.trainlcd.grpc.RouteMinimalResponse} RouteMinimalResponse
+                 */
+                RouteMinimalResponse.fromObject = function fromObject(object) {
+                    if (object instanceof $root.app.trainlcd.grpc.RouteMinimalResponse)
+                        return object;
+                    let message = new $root.app.trainlcd.grpc.RouteMinimalResponse();
+                    if (object.routes) {
+                        if (!Array.isArray(object.routes))
+                            throw TypeError(".app.trainlcd.grpc.RouteMinimalResponse.routes: array expected");
+                        message.routes = [];
+                        for (let i = 0; i < object.routes.length; ++i) {
+                            if (typeof object.routes[i] !== "object")
+                                throw TypeError(".app.trainlcd.grpc.RouteMinimalResponse.routes: object expected");
+                            message.routes[i] = $root.app.trainlcd.grpc.RouteMinimal.fromObject(object.routes[i]);
+                        }
+                    }
+                    if (object.lines) {
+                        if (!Array.isArray(object.lines))
+                            throw TypeError(".app.trainlcd.grpc.RouteMinimalResponse.lines: array expected");
+                        message.lines = [];
+                        for (let i = 0; i < object.lines.length; ++i) {
+                            if (typeof object.lines[i] !== "object")
+                                throw TypeError(".app.trainlcd.grpc.RouteMinimalResponse.lines: object expected");
+                            message.lines[i] = $root.app.trainlcd.grpc.LineMinimal.fromObject(object.lines[i]);
+                        }
+                    }
+                    if (object.nextPageToken != null)
+                        message.nextPageToken = String(object.nextPageToken);
+                    return message;
+                };
+
+                /**
+                 * Creates a plain object from a RouteMinimalResponse message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof app.trainlcd.grpc.RouteMinimalResponse
+                 * @static
+                 * @param {app.trainlcd.grpc.RouteMinimalResponse} message RouteMinimalResponse
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                RouteMinimalResponse.toObject = function toObject(message, options) {
+                    if (!options)
+                        options = {};
+                    let object = {};
+                    if (options.arrays || options.defaults) {
+                        object.routes = [];
+                        object.lines = [];
+                    }
+                    if (options.defaults)
+                        object.nextPageToken = "";
+                    if (message.routes && message.routes.length) {
+                        object.routes = [];
+                        for (let j = 0; j < message.routes.length; ++j)
+                            object.routes[j] = $root.app.trainlcd.grpc.RouteMinimal.toObject(message.routes[j], options);
+                    }
+                    if (message.lines && message.lines.length) {
+                        object.lines = [];
+                        for (let j = 0; j < message.lines.length; ++j)
+                            object.lines[j] = $root.app.trainlcd.grpc.LineMinimal.toObject(message.lines[j], options);
+                    }
+                    if (message.nextPageToken != null && message.hasOwnProperty("nextPageToken"))
+                        object.nextPageToken = message.nextPageToken;
+                    return object;
+                };
+
+                /**
+                 * Converts this RouteMinimalResponse to JSON.
+                 * @function toJSON
+                 * @memberof app.trainlcd.grpc.RouteMinimalResponse
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                RouteMinimalResponse.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
+
+                /**
+                 * Gets the default type url for RouteMinimalResponse
+                 * @function getTypeUrl
+                 * @memberof app.trainlcd.grpc.RouteMinimalResponse
+                 * @static
+                 * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns {string} The default type url
+                 */
+                RouteMinimalResponse.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                    if (typeUrlPrefix === undefined) {
+                        typeUrlPrefix = "type.googleapis.com";
+                    }
+                    return typeUrlPrefix + "/app.trainlcd.grpc.RouteMinimalResponse";
+                };
+
+                return RouteMinimalResponse;
             })();
 
             return grpc;

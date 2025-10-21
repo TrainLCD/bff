@@ -6,7 +6,7 @@
 		"deploy": "wrangler deploy",
 		"dev": "wrangler dev",
 		"start": "wrangler dev",
-		"test": "vitest",
+		"test": "vitest --run",
 		"cf-typegen": "wrangler types",
 		"proto:generate": "pbjs -t static-module -w es6 -o src/generated/stationapi.js proto/stationapi.proto && pbts -o src/generated/stationapi.d.ts src/generated/stationapi.js",
 		"schema:generate": "node scripts/generate-schema.mjs"

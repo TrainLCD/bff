@@ -9,7 +9,19 @@
 	"compatibility_date": "2025-10-11",
 	"observability": {
 		"enabled": true
-	}
+	},
+	/**
+	 * KV Namespace for caching gRPC responses
+	 * Create with: wrangler kv namespace create GRPC_CACHE
+	 * For preview: wrangler kv namespace create GRPC_CACHE --preview
+	 */
+	"kv_namespaces": [
+		{
+			"binding": "GRPC_CACHE",
+			"id": "3f8510f3f32c4d67a7d477b36ce747d6",
+			"preview_id": "626138676e374776b3addd3fa6ba94e3"
+		}
+	]
 	/**
 	 * Smart Placement
 	 * Docs: https://developers.cloudflare.com/workers/configuration/smart-placement/#smart-placement

@@ -5,7 +5,7 @@
 import { handleGraphQLRequest } from './graphqlGateway';
 
 export default {
-	async fetch(request, env, _ctx): Promise<Response> {
-		return handleGraphQLRequest(request, env);
+	async fetch(request, env, ctx): Promise<Response> {
+		return handleGraphQLRequest(request, env, ctx);
 	},
 } satisfies ExportedHandler<Env>;

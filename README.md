@@ -15,7 +15,7 @@ npm install
 ```
 
 ## Environment Variables
-- `GRPC_TARGET_ORIGIN` (required): Origin of the upstream gRPC-Web endpoint, for example `https://grpc-stg.trainlcd.app`. The worker returns HTTP 500 if this value is missing or invalid.
+- `GRPC_TARGET_ORIGIN` (required): Origin of the upstream gRPC-Web endpoint, for example `https://grpc.example.com`. The worker returns HTTP 500 if this value is missing or invalid.
 - `GRPC_ALLOWED_ORIGINS` (optional): Comma-separated list of origins allowed via CORS. Omit to allow all origins.
 
 For local development set these in `.dev.vars` or the `vars` section of `wrangler.jsonc`. Configure environment-specific values before deploying.
@@ -31,19 +31,21 @@ npm run dev
 - GraphQL endpoint is exposed at `/graphql` (`POST` for queries, `GET` returns the SDL).
 - The runtime schema is declared in `schema.graphql` and mirrored in `src/graphqlGateway.ts`.
 - Supported queries include:
-  - `station(id: Int!)`
-  - `stations(ids: [Int!]!)`
-  - `stationsNearby(latitude: Float!, longitude: Float!, limit: Int)`
-  - `stationsByName(name: String!, limit: Int, fromStationGroupId: Int)`
-  - `stationGroupStations(groupId: Int!)`
-  - `lineGroupStations(lineGroupId: Int!)`
-  - `line(lineId: Int!)`
-  - `linesByName(name: String!, limit: Int)`
-  - `lineStations(lineId: Int!, stationId: Int)`
-  - `stationTrainTypes(stationId: Int!)`
-  - `routes(fromStationGroupId: Int!, toStationGroupId: Int!, pageSize: Int, pageToken: String)`
-  - `routeTypes(fromStationGroupId: Int!, toStationGroupId: Int!, pageSize: Int, pageToken: String)`
-  - `connectedRoutes(fromStationGroupId: Int!, toStationGroupId: Int!)`
+  - `station(id: Int!)` — Uses `GetStationById` RPC
+  - `stations(ids: [Int!]!)` — Uses `GetStationByIdList` RPC
+  - `stationsNearby(latitude: Float!, longitude: Float!, limit: Int)` — Uses `GetStationsByCoordinates` RPC
+  - `stationsByName(name: String!, limit: Int, fromStationGroupId: Int)` — Uses `GetStationsByName` RPC
+  - `stationGroupStations(groupId: Int!)` — Uses `GetStationByGroupId` RPC
+  - `lineGroupStations(lineGroupId: Int!)` — Uses `GetStationsByLineGroupId` RPC
+  - `line(lineId: Int!)` — Uses `GetLineById` RPC
+  - `linesByName(name: String!, limit: Int)` — Uses `GetLinesByName` RPC
+  - `lineStations(lineId: Int!, stationId: Int)` — Uses `GetStationsByLineId` RPC
+  - `stationTrainTypes(stationId: Int!)` — Uses `GetTrainTypesByStationId` RPC
+  - `routes(fromStationGroupId: Int!, toStationGroupId: Int!, pageSize: Int, pageToken: String)` — Uses `GetRoutesMinimal` RPC (optimized with deduplicated line data)
+  - `routeTypes(fromStationGroupId: Int!, toStationGroupId: Int!, pageSize: Int, pageToken: String)` — Uses `GetRouteTypes` RPC
+  - `connectedRoutes(fromStationGroupId: Int!, toStationGroupId: Int!)` — Uses `GetConnectedRoutes` RPC
+
+The `routes` query uses the `GetRoutesMinimal` RPC which returns normalized/deduplicated line data for efficient transmission. The BFF automatically reconstructs full `Station` objects by resolving line references.
 
 Customize or extend the schema by editing `schema.graphql` and updating the resolvers in `src/graphqlGateway.ts`.
 

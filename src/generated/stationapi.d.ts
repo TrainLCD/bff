@@ -156,6 +156,20 @@ export namespace app {
                 public getRoutes(request: app.trainlcd.grpc.IGetRouteRequest): Promise<app.trainlcd.grpc.RouteResponse>;
 
                 /**
+                 * Calls GetRoutesMinimal.
+                 * @param request GetRouteRequest message or plain object
+                 * @param callback Node-style callback called with the error, if any, and RouteMinimalResponse
+                 */
+                public getRoutesMinimal(request: app.trainlcd.grpc.IGetRouteRequest, callback: app.trainlcd.grpc.StationAPI.GetRoutesMinimalCallback): void;
+
+                /**
+                 * Calls GetRoutesMinimal.
+                 * @param request GetRouteRequest message or plain object
+                 * @returns Promise
+                 */
+                public getRoutesMinimal(request: app.trainlcd.grpc.IGetRouteRequest): Promise<app.trainlcd.grpc.RouteMinimalResponse>;
+
+                /**
                  * Calls GetLineById.
                  * @param request GetLineByIdRequest message or plain object
                  * @param callback Node-style callback called with the error, if any, and SingleLineResponse
@@ -168,6 +182,20 @@ export namespace app {
                  * @returns Promise
                  */
                 public getLineById(request: app.trainlcd.grpc.IGetLineByIdRequest): Promise<app.trainlcd.grpc.SingleLineResponse>;
+
+                /**
+                 * Calls GetLineByIdList.
+                 * @param request GetLineByIdListRequest message or plain object
+                 * @param callback Node-style callback called with the error, if any, and MultipleLineResponse
+                 */
+                public getLineByIdList(request: app.trainlcd.grpc.IGetLineByIdListRequest, callback: app.trainlcd.grpc.StationAPI.GetLineByIdListCallback): void;
+
+                /**
+                 * Calls GetLineByIdList.
+                 * @param request GetLineByIdListRequest message or plain object
+                 * @returns Promise
+                 */
+                public getLineByIdList(request: app.trainlcd.grpc.IGetLineByIdListRequest): Promise<app.trainlcd.grpc.MultipleLineResponse>;
 
                 /**
                  * Calls GetLinesByName.
@@ -278,11 +306,25 @@ export namespace app {
                 type GetRoutesCallback = (error: (Error|null), response?: app.trainlcd.grpc.RouteResponse) => void;
 
                 /**
+                 * Callback as used by {@link app.trainlcd.grpc.StationAPI#getRoutesMinimal}.
+                 * @param error Error, if any
+                 * @param [response] RouteMinimalResponse
+                 */
+                type GetRoutesMinimalCallback = (error: (Error|null), response?: app.trainlcd.grpc.RouteMinimalResponse) => void;
+
+                /**
                  * Callback as used by {@link app.trainlcd.grpc.StationAPI#getLineById}.
                  * @param error Error, if any
                  * @param [response] SingleLineResponse
                  */
                 type GetLineByIdCallback = (error: (Error|null), response?: app.trainlcd.grpc.SingleLineResponse) => void;
+
+                /**
+                 * Callback as used by {@link app.trainlcd.grpc.StationAPI#getLineByIdList}.
+                 * @param error Error, if any
+                 * @param [response] MultipleLineResponse
+                 */
+                type GetLineByIdListCallback = (error: (Error|null), response?: app.trainlcd.grpc.MultipleLineResponse) => void;
 
                 /**
                  * Callback as used by {@link app.trainlcd.grpc.StationAPI#getLinesByName}.
@@ -1330,6 +1372,103 @@ export namespace app {
 
                 /**
                  * Gets the default type url for GetLineByIdRequest
+                 * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns The default type url
+                 */
+                public static getTypeUrl(typeUrlPrefix?: string): string;
+            }
+
+            /** Properties of a GetLineByIdListRequest. */
+            interface IGetLineByIdListRequest {
+
+                /** GetLineByIdListRequest lineIds */
+                lineIds?: (number[]|null);
+            }
+
+            /** Represents a GetLineByIdListRequest. */
+            class GetLineByIdListRequest implements IGetLineByIdListRequest {
+
+                /**
+                 * Constructs a new GetLineByIdListRequest.
+                 * @param [properties] Properties to set
+                 */
+                constructor(properties?: app.trainlcd.grpc.IGetLineByIdListRequest);
+
+                /** GetLineByIdListRequest lineIds. */
+                public lineIds: number[];
+
+                /**
+                 * Creates a new GetLineByIdListRequest instance using the specified properties.
+                 * @param [properties] Properties to set
+                 * @returns GetLineByIdListRequest instance
+                 */
+                public static create(properties?: app.trainlcd.grpc.IGetLineByIdListRequest): app.trainlcd.grpc.GetLineByIdListRequest;
+
+                /**
+                 * Encodes the specified GetLineByIdListRequest message. Does not implicitly {@link app.trainlcd.grpc.GetLineByIdListRequest.verify|verify} messages.
+                 * @param message GetLineByIdListRequest message or plain object to encode
+                 * @param [writer] Writer to encode to
+                 * @returns Writer
+                 */
+                public static encode(message: app.trainlcd.grpc.IGetLineByIdListRequest, writer?: $protobuf.Writer): $protobuf.Writer;
+
+                /**
+                 * Encodes the specified GetLineByIdListRequest message, length delimited. Does not implicitly {@link app.trainlcd.grpc.GetLineByIdListRequest.verify|verify} messages.
+                 * @param message GetLineByIdListRequest message or plain object to encode
+                 * @param [writer] Writer to encode to
+                 * @returns Writer
+                 */
+                public static encodeDelimited(message: app.trainlcd.grpc.IGetLineByIdListRequest, writer?: $protobuf.Writer): $protobuf.Writer;
+
+                /**
+                 * Decodes a GetLineByIdListRequest message from the specified reader or buffer.
+                 * @param reader Reader or buffer to decode from
+                 * @param [length] Message length if known beforehand
+                 * @returns GetLineByIdListRequest
+                 * @throws {Error} If the payload is not a reader or valid buffer
+                 * @throws {$protobuf.util.ProtocolError} If required fields are missing
+                 */
+                public static decode(reader: ($protobuf.Reader|Uint8Array), length?: number): app.trainlcd.grpc.GetLineByIdListRequest;
+
+                /**
+                 * Decodes a GetLineByIdListRequest message from the specified reader or buffer, length delimited.
+                 * @param reader Reader or buffer to decode from
+                 * @returns GetLineByIdListRequest
+                 * @throws {Error} If the payload is not a reader or valid buffer
+                 * @throws {$protobuf.util.ProtocolError} If required fields are missing
+                 */
+                public static decodeDelimited(reader: ($protobuf.Reader|Uint8Array)): app.trainlcd.grpc.GetLineByIdListRequest;
+
+                /**
+                 * Verifies a GetLineByIdListRequest message.
+                 * @param message Plain object to verify
+                 * @returns `null` if valid, otherwise the reason why it is not
+                 */
+                public static verify(message: { [k: string]: any }): (string|null);
+
+                /**
+                 * Creates a GetLineByIdListRequest message from a plain object. Also converts values to their respective internal types.
+                 * @param object Plain object
+                 * @returns GetLineByIdListRequest
+                 */
+                public static fromObject(object: { [k: string]: any }): app.trainlcd.grpc.GetLineByIdListRequest;
+
+                /**
+                 * Creates a plain object from a GetLineByIdListRequest message. Also converts values to other types if specified.
+                 * @param message GetLineByIdListRequest
+                 * @param [options] Conversion options
+                 * @returns Plain object
+                 */
+                public static toObject(message: app.trainlcd.grpc.GetLineByIdListRequest, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                /**
+                 * Converts this GetLineByIdListRequest to JSON.
+                 * @returns JSON object
+                 */
+                public toJSON(): { [k: string]: any };
+
+                /**
+                 * Gets the default type url for GetLineByIdListRequest
                  * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
                  * @returns The default type url
                  */
@@ -3825,6 +3964,499 @@ export namespace app {
 
                 /**
                  * Gets the default type url for Route
+                 * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns The default type url
+                 */
+                public static getTypeUrl(typeUrlPrefix?: string): string;
+            }
+
+            /** Properties of a StationMinimal. */
+            interface IStationMinimal {
+
+                /** StationMinimal id */
+                id?: (number|null);
+
+                /** StationMinimal groupId */
+                groupId?: (number|null);
+
+                /** StationMinimal name */
+                name?: (string|null);
+
+                /** StationMinimal nameKatakana */
+                nameKatakana?: (string|null);
+
+                /** StationMinimal nameRoman */
+                nameRoman?: (string|null);
+
+                /** StationMinimal lineIds */
+                lineIds?: (number[]|null);
+
+                /** StationMinimal stationNumbers */
+                stationNumbers?: (app.trainlcd.grpc.IStationNumber[]|null);
+
+                /** StationMinimal stopCondition */
+                stopCondition?: (app.trainlcd.grpc.StopCondition|null);
+
+                /** StationMinimal hasTrainTypes */
+                hasTrainTypes?: (boolean|null);
+
+                /** StationMinimal trainTypeId */
+                trainTypeId?: (number|null);
+            }
+
+            /** Represents a StationMinimal. */
+            class StationMinimal implements IStationMinimal {
+
+                /**
+                 * Constructs a new StationMinimal.
+                 * @param [properties] Properties to set
+                 */
+                constructor(properties?: app.trainlcd.grpc.IStationMinimal);
+
+                /** StationMinimal id. */
+                public id: number;
+
+                /** StationMinimal groupId. */
+                public groupId: number;
+
+                /** StationMinimal name. */
+                public name: string;
+
+                /** StationMinimal nameKatakana. */
+                public nameKatakana: string;
+
+                /** StationMinimal nameRoman. */
+                public nameRoman?: (string|null);
+
+                /** StationMinimal lineIds. */
+                public lineIds: number[];
+
+                /** StationMinimal stationNumbers. */
+                public stationNumbers: app.trainlcd.grpc.IStationNumber[];
+
+                /** StationMinimal stopCondition. */
+                public stopCondition: app.trainlcd.grpc.StopCondition;
+
+                /** StationMinimal hasTrainTypes. */
+                public hasTrainTypes?: (boolean|null);
+
+                /** StationMinimal trainTypeId. */
+                public trainTypeId?: (number|null);
+
+                /** StationMinimal _nameRoman. */
+                public _nameRoman?: "nameRoman";
+
+                /** StationMinimal _hasTrainTypes. */
+                public _hasTrainTypes?: "hasTrainTypes";
+
+                /** StationMinimal _trainTypeId. */
+                public _trainTypeId?: "trainTypeId";
+
+                /**
+                 * Creates a new StationMinimal instance using the specified properties.
+                 * @param [properties] Properties to set
+                 * @returns StationMinimal instance
+                 */
+                public static create(properties?: app.trainlcd.grpc.IStationMinimal): app.trainlcd.grpc.StationMinimal;
+
+                /**
+                 * Encodes the specified StationMinimal message. Does not implicitly {@link app.trainlcd.grpc.StationMinimal.verify|verify} messages.
+                 * @param message StationMinimal message or plain object to encode
+                 * @param [writer] Writer to encode to
+                 * @returns Writer
+                 */
+                public static encode(message: app.trainlcd.grpc.IStationMinimal, writer?: $protobuf.Writer): $protobuf.Writer;
+
+                /**
+                 * Encodes the specified StationMinimal message, length delimited. Does not implicitly {@link app.trainlcd.grpc.StationMinimal.verify|verify} messages.
+                 * @param message StationMinimal message or plain object to encode
+                 * @param [writer] Writer to encode to
+                 * @returns Writer
+                 */
+                public static encodeDelimited(message: app.trainlcd.grpc.IStationMinimal, writer?: $protobuf.Writer): $protobuf.Writer;
+
+                /**
+                 * Decodes a StationMinimal message from the specified reader or buffer.
+                 * @param reader Reader or buffer to decode from
+                 * @param [length] Message length if known beforehand
+                 * @returns StationMinimal
+                 * @throws {Error} If the payload is not a reader or valid buffer
+                 * @throws {$protobuf.util.ProtocolError} If required fields are missing
+                 */
+                public static decode(reader: ($protobuf.Reader|Uint8Array), length?: number): app.trainlcd.grpc.StationMinimal;
+
+                /**
+                 * Decodes a StationMinimal message from the specified reader or buffer, length delimited.
+                 * @param reader Reader or buffer to decode from
+                 * @returns StationMinimal
+                 * @throws {Error} If the payload is not a reader or valid buffer
+                 * @throws {$protobuf.util.ProtocolError} If required fields are missing
+                 */
+                public static decodeDelimited(reader: ($protobuf.Reader|Uint8Array)): app.trainlcd.grpc.StationMinimal;
+
+                /**
+                 * Verifies a StationMinimal message.
+                 * @param message Plain object to verify
+                 * @returns `null` if valid, otherwise the reason why it is not
+                 */
+                public static verify(message: { [k: string]: any }): (string|null);
+
+                /**
+                 * Creates a StationMinimal message from a plain object. Also converts values to their respective internal types.
+                 * @param object Plain object
+                 * @returns StationMinimal
+                 */
+                public static fromObject(object: { [k: string]: any }): app.trainlcd.grpc.StationMinimal;
+
+                /**
+                 * Creates a plain object from a StationMinimal message. Also converts values to other types if specified.
+                 * @param message StationMinimal
+                 * @param [options] Conversion options
+                 * @returns Plain object
+                 */
+                public static toObject(message: app.trainlcd.grpc.StationMinimal, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                /**
+                 * Converts this StationMinimal to JSON.
+                 * @returns JSON object
+                 */
+                public toJSON(): { [k: string]: any };
+
+                /**
+                 * Gets the default type url for StationMinimal
+                 * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns The default type url
+                 */
+                public static getTypeUrl(typeUrlPrefix?: string): string;
+            }
+
+            /** Properties of a LineMinimal. */
+            interface ILineMinimal {
+
+                /** LineMinimal id */
+                id?: (number|null);
+
+                /** LineMinimal nameShort */
+                nameShort?: (string|null);
+
+                /** LineMinimal color */
+                color?: (string|null);
+
+                /** LineMinimal lineType */
+                lineType?: (app.trainlcd.grpc.LineType|null);
+
+                /** LineMinimal lineSymbols */
+                lineSymbols?: (app.trainlcd.grpc.ILineSymbol[]|null);
+            }
+
+            /** Represents a LineMinimal. */
+            class LineMinimal implements ILineMinimal {
+
+                /**
+                 * Constructs a new LineMinimal.
+                 * @param [properties] Properties to set
+                 */
+                constructor(properties?: app.trainlcd.grpc.ILineMinimal);
+
+                /** LineMinimal id. */
+                public id: number;
+
+                /** LineMinimal nameShort. */
+                public nameShort: string;
+
+                /** LineMinimal color. */
+                public color: string;
+
+                /** LineMinimal lineType. */
+                public lineType: app.trainlcd.grpc.LineType;
+
+                /** LineMinimal lineSymbols. */
+                public lineSymbols: app.trainlcd.grpc.ILineSymbol[];
+
+                /**
+                 * Creates a new LineMinimal instance using the specified properties.
+                 * @param [properties] Properties to set
+                 * @returns LineMinimal instance
+                 */
+                public static create(properties?: app.trainlcd.grpc.ILineMinimal): app.trainlcd.grpc.LineMinimal;
+
+                /**
+                 * Encodes the specified LineMinimal message. Does not implicitly {@link app.trainlcd.grpc.LineMinimal.verify|verify} messages.
+                 * @param message LineMinimal message or plain object to encode
+                 * @param [writer] Writer to encode to
+                 * @returns Writer
+                 */
+                public static encode(message: app.trainlcd.grpc.ILineMinimal, writer?: $protobuf.Writer): $protobuf.Writer;
+
+                /**
+                 * Encodes the specified LineMinimal message, length delimited. Does not implicitly {@link app.trainlcd.grpc.LineMinimal.verify|verify} messages.
+                 * @param message LineMinimal message or plain object to encode
+                 * @param [writer] Writer to encode to
+                 * @returns Writer
+                 */
+                public static encodeDelimited(message: app.trainlcd.grpc.ILineMinimal, writer?: $protobuf.Writer): $protobuf.Writer;
+
+                /**
+                 * Decodes a LineMinimal message from the specified reader or buffer.
+                 * @param reader Reader or buffer to decode from
+                 * @param [length] Message length if known beforehand
+                 * @returns LineMinimal
+                 * @throws {Error} If the payload is not a reader or valid buffer
+                 * @throws {$protobuf.util.ProtocolError} If required fields are missing
+                 */
+                public static decode(reader: ($protobuf.Reader|Uint8Array), length?: number): app.trainlcd.grpc.LineMinimal;
+
+                /**
+                 * Decodes a LineMinimal message from the specified reader or buffer, length delimited.
+                 * @param reader Reader or buffer to decode from
+                 * @returns LineMinimal
+                 * @throws {Error} If the payload is not a reader or valid buffer
+                 * @throws {$protobuf.util.ProtocolError} If required fields are missing
+                 */
+                public static decodeDelimited(reader: ($protobuf.Reader|Uint8Array)): app.trainlcd.grpc.LineMinimal;
+
+                /**
+                 * Verifies a LineMinimal message.
+                 * @param message Plain object to verify
+                 * @returns `null` if valid, otherwise the reason why it is not
+                 */
+                public static verify(message: { [k: string]: any }): (string|null);
+
+                /**
+                 * Creates a LineMinimal message from a plain object. Also converts values to their respective internal types.
+                 * @param object Plain object
+                 * @returns LineMinimal
+                 */
+                public static fromObject(object: { [k: string]: any }): app.trainlcd.grpc.LineMinimal;
+
+                /**
+                 * Creates a plain object from a LineMinimal message. Also converts values to other types if specified.
+                 * @param message LineMinimal
+                 * @param [options] Conversion options
+                 * @returns Plain object
+                 */
+                public static toObject(message: app.trainlcd.grpc.LineMinimal, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                /**
+                 * Converts this LineMinimal to JSON.
+                 * @returns JSON object
+                 */
+                public toJSON(): { [k: string]: any };
+
+                /**
+                 * Gets the default type url for LineMinimal
+                 * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns The default type url
+                 */
+                public static getTypeUrl(typeUrlPrefix?: string): string;
+            }
+
+            /** Properties of a RouteMinimal. */
+            interface IRouteMinimal {
+
+                /** RouteMinimal id */
+                id?: (number|null);
+
+                /** RouteMinimal stops */
+                stops?: (app.trainlcd.grpc.IStationMinimal[]|null);
+            }
+
+            /** Represents a RouteMinimal. */
+            class RouteMinimal implements IRouteMinimal {
+
+                /**
+                 * Constructs a new RouteMinimal.
+                 * @param [properties] Properties to set
+                 */
+                constructor(properties?: app.trainlcd.grpc.IRouteMinimal);
+
+                /** RouteMinimal id. */
+                public id: number;
+
+                /** RouteMinimal stops. */
+                public stops: app.trainlcd.grpc.IStationMinimal[];
+
+                /**
+                 * Creates a new RouteMinimal instance using the specified properties.
+                 * @param [properties] Properties to set
+                 * @returns RouteMinimal instance
+                 */
+                public static create(properties?: app.trainlcd.grpc.IRouteMinimal): app.trainlcd.grpc.RouteMinimal;
+
+                /**
+                 * Encodes the specified RouteMinimal message. Does not implicitly {@link app.trainlcd.grpc.RouteMinimal.verify|verify} messages.
+                 * @param message RouteMinimal message or plain object to encode
+                 * @param [writer] Writer to encode to
+                 * @returns Writer
+                 */
+                public static encode(message: app.trainlcd.grpc.IRouteMinimal, writer?: $protobuf.Writer): $protobuf.Writer;
+
+                /**
+                 * Encodes the specified RouteMinimal message, length delimited. Does not implicitly {@link app.trainlcd.grpc.RouteMinimal.verify|verify} messages.
+                 * @param message RouteMinimal message or plain object to encode
+                 * @param [writer] Writer to encode to
+                 * @returns Writer
+                 */
+                public static encodeDelimited(message: app.trainlcd.grpc.IRouteMinimal, writer?: $protobuf.Writer): $protobuf.Writer;
+
+                /**
+                 * Decodes a RouteMinimal message from the specified reader or buffer.
+                 * @param reader Reader or buffer to decode from
+                 * @param [length] Message length if known beforehand
+                 * @returns RouteMinimal
+                 * @throws {Error} If the payload is not a reader or valid buffer
+                 * @throws {$protobuf.util.ProtocolError} If required fields are missing
+                 */
+                public static decode(reader: ($protobuf.Reader|Uint8Array), length?: number): app.trainlcd.grpc.RouteMinimal;
+
+                /**
+                 * Decodes a RouteMinimal message from the specified reader or buffer, length delimited.
+                 * @param reader Reader or buffer to decode from
+                 * @returns RouteMinimal
+                 * @throws {Error} If the payload is not a reader or valid buffer
+                 * @throws {$protobuf.util.ProtocolError} If required fields are missing
+                 */
+                public static decodeDelimited(reader: ($protobuf.Reader|Uint8Array)): app.trainlcd.grpc.RouteMinimal;
+
+                /**
+                 * Verifies a RouteMinimal message.
+                 * @param message Plain object to verify
+                 * @returns `null` if valid, otherwise the reason why it is not
+                 */
+                public static verify(message: { [k: string]: any }): (string|null);
+
+                /**
+                 * Creates a RouteMinimal message from a plain object. Also converts values to their respective internal types.
+                 * @param object Plain object
+                 * @returns RouteMinimal
+                 */
+                public static fromObject(object: { [k: string]: any }): app.trainlcd.grpc.RouteMinimal;
+
+                /**
+                 * Creates a plain object from a RouteMinimal message. Also converts values to other types if specified.
+                 * @param message RouteMinimal
+                 * @param [options] Conversion options
+                 * @returns Plain object
+                 */
+                public static toObject(message: app.trainlcd.grpc.RouteMinimal, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                /**
+                 * Converts this RouteMinimal to JSON.
+                 * @returns JSON object
+                 */
+                public toJSON(): { [k: string]: any };
+
+                /**
+                 * Gets the default type url for RouteMinimal
+                 * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns The default type url
+                 */
+                public static getTypeUrl(typeUrlPrefix?: string): string;
+            }
+
+            /** Properties of a RouteMinimalResponse. */
+            interface IRouteMinimalResponse {
+
+                /** RouteMinimalResponse routes */
+                routes?: (app.trainlcd.grpc.IRouteMinimal[]|null);
+
+                /** RouteMinimalResponse lines */
+                lines?: (app.trainlcd.grpc.ILineMinimal[]|null);
+
+                /** RouteMinimalResponse nextPageToken */
+                nextPageToken?: (string|null);
+            }
+
+            /** Represents a RouteMinimalResponse. */
+            class RouteMinimalResponse implements IRouteMinimalResponse {
+
+                /**
+                 * Constructs a new RouteMinimalResponse.
+                 * @param [properties] Properties to set
+                 */
+                constructor(properties?: app.trainlcd.grpc.IRouteMinimalResponse);
+
+                /** RouteMinimalResponse routes. */
+                public routes: app.trainlcd.grpc.IRouteMinimal[];
+
+                /** RouteMinimalResponse lines. */
+                public lines: app.trainlcd.grpc.ILineMinimal[];
+
+                /** RouteMinimalResponse nextPageToken. */
+                public nextPageToken: string;
+
+                /**
+                 * Creates a new RouteMinimalResponse instance using the specified properties.
+                 * @param [properties] Properties to set
+                 * @returns RouteMinimalResponse instance
+                 */
+                public static create(properties?: app.trainlcd.grpc.IRouteMinimalResponse): app.trainlcd.grpc.RouteMinimalResponse;
+
+                /**
+                 * Encodes the specified RouteMinimalResponse message. Does not implicitly {@link app.trainlcd.grpc.RouteMinimalResponse.verify|verify} messages.
+                 * @param message RouteMinimalResponse message or plain object to encode
+                 * @param [writer] Writer to encode to
+                 * @returns Writer
+                 */
+                public static encode(message: app.trainlcd.grpc.IRouteMinimalResponse, writer?: $protobuf.Writer): $protobuf.Writer;
+
+                /**
+                 * Encodes the specified RouteMinimalResponse message, length delimited. Does not implicitly {@link app.trainlcd.grpc.RouteMinimalResponse.verify|verify} messages.
+                 * @param message RouteMinimalResponse message or plain object to encode
+                 * @param [writer] Writer to encode to
+                 * @returns Writer
+                 */
+                public static encodeDelimited(message: app.trainlcd.grpc.IRouteMinimalResponse, writer?: $protobuf.Writer): $protobuf.Writer;
+
+                /**
+                 * Decodes a RouteMinimalResponse message from the specified reader or buffer.
+                 * @param reader Reader or buffer to decode from
+                 * @param [length] Message length if known beforehand
+                 * @returns RouteMinimalResponse
+                 * @throws {Error} If the payload is not a reader or valid buffer
+                 * @throws {$protobuf.util.ProtocolError} If required fields are missing
+                 */
+                public static decode(reader: ($protobuf.Reader|Uint8Array), length?: number): app.trainlcd.grpc.RouteMinimalResponse;
+
+                /**
+                 * Decodes a RouteMinimalResponse message from the specified reader or buffer, length delimited.
+                 * @param reader Reader or buffer to decode from
+                 * @returns RouteMinimalResponse
+                 * @throws {Error} If the payload is not a reader or valid buffer
+                 * @throws {$protobuf.util.ProtocolError} If required fields are missing
+                 */
+                public static decodeDelimited(reader: ($protobuf.Reader|Uint8Array)): app.trainlcd.grpc.RouteMinimalResponse;
+
+                /**
+                 * Verifies a RouteMinimalResponse message.
+                 * @param message Plain object to verify
+                 * @returns `null` if valid, otherwise the reason why it is not
+                 */
+                public static verify(message: { [k: string]: any }): (string|null);
+
+                /**
+                 * Creates a RouteMinimalResponse message from a plain object. Also converts values to their respective internal types.
+                 * @param object Plain object
+                 * @returns RouteMinimalResponse
+                 */
+                public static fromObject(object: { [k: string]: any }): app.trainlcd.grpc.RouteMinimalResponse;
+
+                /**
+                 * Creates a plain object from a RouteMinimalResponse message. Also converts values to other types if specified.
+                 * @param message RouteMinimalResponse
+                 * @param [options] Conversion options
+                 * @returns Plain object
+                 */
+                public static toObject(message: app.trainlcd.grpc.RouteMinimalResponse, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                /**
+                 * Converts this RouteMinimalResponse to JSON.
+                 * @returns JSON object
+                 */
+                public toJSON(): { [k: string]: any };
+
+                /**
+                 * Gets the default type url for RouteMinimalResponse
                  * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
                  * @returns The default type url
                  */
