@@ -1,5 +1,5 @@
 import { Reader } from 'protobufjs/minimal';
-import { graphql, buildSchema, GraphQLError, GraphQLSchema } from 'graphql';
+import { graphql, buildSchema, GraphQLError, GraphQLSchema, ExecutionResult } from 'graphql';
 import { app } from './generated/stationapi.js';
 import { schemaSDL } from './schema.js';
 
@@ -43,13 +43,23 @@ type MessageType = {
 	verify(message: Record<string, unknown>): string | null;
 };
 
+type GraphQLOperationPayload = {
+	query: string;
+	variableValues?: Record<string, unknown>;
+	operationName?: string;
+};
+
 class GrpcError extends Error {
-	constructor(
-		public readonly statusCode: number,
-		public readonly publicMessage: string,
-	) {
+	constructor(public readonly statusCode: number, public readonly publicMessage: string) {
 		super(publicMessage);
 		this.name = 'GrpcError';
+	}
+}
+
+class GraphQLRequestValidationError extends Error {
+	constructor(message: string) {
+		super(message);
+		this.name = 'GraphQLRequestValidationError';
 	}
 }
 
@@ -84,90 +94,97 @@ export async function handleGraphQLRequest(request: Request, env: GatewayEnv, ct
 		return buildGraphQLErrorResponse(400, 'Invalid JSON payload', corsOrigin);
 	}
 
-	if (typeof body !== 'object' || body === null) {
-		return buildGraphQLErrorResponse(400, 'Invalid GraphQL request body', corsOrigin);
+	const client = new GrpcClient(config, env.GRPC_CACHE, ctx);
+	const rootValue = createResolvers(client);
+
+	try {
+		if (Array.isArray(body)) {
+			if (body.length === 0) {
+				throw new GraphQLRequestValidationError('Batch GraphQL payload must contain at least one operation');
+			}
+			const operations: GraphQLOperationPayload[] = new Array(body.length);
+			for (let i = 0; i < body.length; i++) {
+				operations[i] = normalizeGraphQLPayload(body[i], i);
+			}
+			const batchResults = await Promise.all(operations.map((operation) => executeGraphQLQuery(operation, rootValue)));
+			return buildGraphQLResponse(batchResults, corsOrigin);
+		}
+
+		const operation = normalizeGraphQLPayload(body);
+		const result = await executeGraphQLQuery(operation, rootValue);
+		return buildGraphQLResponse(result, corsOrigin);
+	} catch (error) {
+		if (error instanceof GraphQLRequestValidationError) {
+			return buildGraphQLErrorResponse(400, error.message, corsOrigin);
+		}
+		throw error;
+	}
+}
+
+function normalizeGraphQLPayload(payload: unknown, batchIndex?: number): GraphQLOperationPayload {
+	const locationSuffix = batchIndex === undefined ? '' : ` at index ${batchIndex}`;
+	if (typeof payload !== 'object' || payload === null || Array.isArray(payload)) {
+		throw new GraphQLRequestValidationError(`Invalid GraphQL request body${locationSuffix}`);
 	}
 
-	const { query, variables, operationName } = body as {
+	const { query, variables, operationName } = payload as {
 		query?: unknown;
 		variables?: unknown;
 		operationName?: unknown;
 	};
 
 	if (typeof query !== 'string') {
-		return buildGraphQLErrorResponse(400, 'Missing GraphQL query', corsOrigin);
+		throw new GraphQLRequestValidationError(`Missing GraphQL query${locationSuffix}`);
 	}
 
 	const variableValues = typeof variables === 'object' && variables !== null ? (variables as Record<string, unknown>) : undefined;
 	const operation = typeof operationName === 'string' ? operationName : undefined;
 
-	const client = new GrpcClient(config, env.GRPC_CACHE, ctx);
-	const rootValue = createResolvers(client);
+	return {
+		query,
+		variableValues,
+		operationName: operation,
+	};
+}
 
+async function executeGraphQLQuery(operation: GraphQLOperationPayload, rootValue: ReturnType<typeof createResolvers>): Promise<ExecutionResult> {
 	const startTime = Date.now();
 	const result = await graphql({
 		schema: getSchema(),
-		source: query,
-		variableValues,
-		operationName: operation,
+		source: operation.query,
+		variableValues: operation.variableValues,
+		operationName: operation.operationName,
 		rootValue,
 	});
-	
-	// Log slow queries for monitoring
 	const duration = Date.now() - startTime;
 	if (duration > 1000) {
-		console.warn(`Slow GraphQL query detected: ${duration}ms`, { operationName: operation });
+		console.warn(`Slow GraphQL query detected: ${duration}ms`, { operationName: operation.operationName });
 	}
-
-	return buildGraphQLResponse(result, corsOrigin);
+	return result;
 }
 
 function createResolvers(client: GrpcClient) {
 	return {
 		station: async ({ id }: { id: number }) => {
-			const payload = await client.call(
-				'GetStationById',
-				grpcTypes.GetStationByIdRequest,
-				grpcTypes.SingleStationResponse,
-				{ id },
-			);
+			const payload = await client.call('GetStationById', grpcTypes.GetStationByIdRequest, grpcTypes.SingleStationResponse, { id });
 			return payload.station ?? null;
 		},
 		stations: async ({ ids }: { ids: number[] }) => {
-			const payload = await client.call(
-				'GetStationByIdList',
-				grpcTypes.GetStationByIdListRequest,
-				grpcTypes.MultipleStationResponse,
-				{ ids },
-			);
+			const payload = await client.call('GetStationByIdList', grpcTypes.GetStationByIdListRequest, grpcTypes.MultipleStationResponse, {
+				ids,
+			});
 			return payload.stations ?? [];
 		},
-		stationsNearby: async ({
-			latitude,
-			longitude,
-			limit,
-		}: {
-			latitude: number;
-			longitude: number;
-			limit?: number;
-		}) => {
+		stationsNearby: async ({ latitude, longitude, limit }: { latitude: number; longitude: number; limit?: number }) => {
 			const payload = await client.call(
 				'GetStationsByCoordinates',
 				grpcTypes.GetStationByCoordinatesRequest,
 				grpcTypes.MultipleStationResponse,
-				cleanPayload({ latitude, longitude, limit }),
+				cleanPayload({ latitude, longitude, limit })
 			);
 			return payload.stations ?? [];
 		},
-		stationsByName: async ({
-			name,
-			limit,
-			fromStationGroupId,
-		}: {
-			name: string;
-			limit?: number;
-			fromStationGroupId?: number;
-		}) => {
+		stationsByName: async ({ name, limit, fromStationGroupId }: { name: string; limit?: number; fromStationGroupId?: number }) => {
 			const payload = await client.call(
 				'GetStationsByName',
 				grpcTypes.GetStationsByNameRequest,
@@ -176,17 +193,14 @@ function createResolvers(client: GrpcClient) {
 					stationName: name,
 					limit,
 					fromStationGroupId,
-				}),
+				})
 			);
 			return payload.stations ?? [];
 		},
 		stationGroupStations: async ({ groupId }: { groupId: number }) => {
-			const payload = await client.call(
-				'GetStationsByGroupId',
-				grpcTypes.GetStationByGroupIdRequest,
-				grpcTypes.MultipleStationResponse,
-				{ groupId },
-			);
+			const payload = await client.call('GetStationsByGroupId', grpcTypes.GetStationByGroupIdRequest, grpcTypes.MultipleStationResponse, {
+				groupId,
+			});
 			return payload.stations ?? [];
 		},
 		lineGroupStations: async ({ lineGroupId }: { lineGroupId: number }) => {
@@ -194,17 +208,12 @@ function createResolvers(client: GrpcClient) {
 				'GetStationsByLineGroupId',
 				grpcTypes.GetStationsByLineGroupIdRequest,
 				grpcTypes.MultipleStationResponse,
-				{ lineGroupId },
+				{ lineGroupId }
 			);
 			return payload.stations ?? [];
 		},
 		line: async ({ lineId }: { lineId: number }) => {
-			const payload = await client.call(
-				'GetLineById',
-				grpcTypes.GetLineByIdRequest,
-				grpcTypes.SingleLineResponse,
-				{ lineId },
-			);
+			const payload = await client.call('GetLineById', grpcTypes.GetLineByIdRequest, grpcTypes.SingleLineResponse, { lineId });
 			return payload.line ?? null;
 		},
 		linesByName: async ({ name, limit }: { name: string; limit?: number }) => {
@@ -212,7 +221,7 @@ function createResolvers(client: GrpcClient) {
 				'GetLinesByName',
 				grpcTypes.GetLinesByNameRequest,
 				grpcTypes.MultipleLineResponse,
-				cleanPayload({ lineName: name, limit }),
+				cleanPayload({ lineName: name, limit })
 			);
 			return payload.lines ?? [];
 		},
@@ -221,7 +230,7 @@ function createResolvers(client: GrpcClient) {
 				'GetStationsByLineId',
 				grpcTypes.GetStationByLineIdRequest,
 				grpcTypes.MultipleStationResponse,
-				cleanPayload({ lineId, stationId }),
+				cleanPayload({ lineId, stationId })
 			);
 			return payload.stations ?? [];
 		},
@@ -230,7 +239,7 @@ function createResolvers(client: GrpcClient) {
 				'GetTrainTypesByStationId',
 				grpcTypes.GetTrainTypesByStationIdRequest,
 				grpcTypes.MultipleTrainTypeResponse,
-				{ stationId },
+				{ stationId }
 			);
 			return payload.trainTypes ?? [];
 		},
@@ -250,15 +259,15 @@ function createResolvers(client: GrpcClient) {
 				'GetRoutesMinimal',
 				grpcTypes.GetRouteRequest,
 				grpcTypes.RouteMinimalResponse,
-				cleanPayload({ fromStationGroupId, toStationGroupId, pageSize: effectivePageSize, pageToken }),
+				cleanPayload({ fromStationGroupId, toStationGroupId, pageSize: effectivePageSize, pageToken })
 			);
-			
+
 			// Fetch train types for stations that have them
 			const fullTrainTypeMap = await fetchFullTrainTypes(client, payload);
-			
+
 			// Convert minimal response to full format using LineMinimal from response
 			const routes = reconstructRoutesFromMinimal(payload, fullTrainTypeMap);
-			
+
 			return {
 				routes: routes ?? [],
 				nextPageToken: payload.nextPageToken ?? null,
@@ -279,27 +288,19 @@ function createResolvers(client: GrpcClient) {
 				'GetRouteTypes',
 				grpcTypes.GetRouteRequest,
 				grpcTypes.RouteTypeResponse,
-				cleanPayload({ fromStationGroupId, toStationGroupId, pageSize, pageToken }),
+				cleanPayload({ fromStationGroupId, toStationGroupId, pageSize, pageToken })
 			);
 			return {
 				trainTypes: payload.trainTypes ?? [],
 				nextPageToken: payload.nextPageToken ?? null,
 			};
 		},
-		connectedRoutes: async ({
-			fromStationGroupId,
-			toStationGroupId,
-		}: {
-			fromStationGroupId: number;
-			toStationGroupId: number;
-		}) => {
-			const payload = await client.call(
-				'GetConnectedRoutes',
-				grpcTypes.GetConnectedStationsRequest,
-				grpcTypes.RouteResponse,
-				{ fromStationGroupId, toStationGroupId },
-			);
-			
+		connectedRoutes: async ({ fromStationGroupId, toStationGroupId }: { fromStationGroupId: number; toStationGroupId: number }) => {
+			const payload = await client.call('GetConnectedRoutes', grpcTypes.GetConnectedStationsRequest, grpcTypes.RouteResponse, {
+				fromStationGroupId,
+				toStationGroupId,
+			});
+
 			// Ensure each station has a line field (fallback to lines[0] if not set)
 			const routes = payload.routes ?? [];
 			for (let i = 0; i < routes.length; i++) {
@@ -315,27 +316,23 @@ function createResolvers(client: GrpcClient) {
 					}
 				}
 			}
-			
+
 			return routes;
 		},
 	};
 }
 
 class GrpcClient {
-	constructor(
-		private readonly config: GatewayConfig,
-		private readonly kv?: KVNamespace,
-		private readonly ctx?: ExecutionContext,
-	) {}
+	constructor(private readonly config: GatewayConfig, private readonly kv?: KVNamespace, private readonly ctx?: ExecutionContext) {}
 
 	async call(
 		methodName: string,
 		requestType: MessageType,
 		responseType: MessageType,
-		payload: Record<string, unknown>,
+		payload: Record<string, unknown>
 	): Promise<Record<string, any>> {
 		const callStartTime = Date.now();
-		
+
 		// Try KV cache first
 		const cacheKey = this.getCacheKey(methodName, payload);
 		if (this.kv && this.isCacheable(methodName)) {
@@ -349,7 +346,7 @@ class GrpcClient {
 				// Continue to actual gRPC call on cache error
 			}
 		}
-		
+
 		try {
 			// Skip validation for performance - trust GraphQL layer validation
 			const message = requestType.create(payload);
@@ -370,7 +367,7 @@ class GrpcClient {
 						'content-type': 'application/grpc-web+proto',
 						'x-grpc-web': '1',
 						'x-user-agent': GATEWAY_USER_AGENT,
-						'accept': 'application/grpc-web+proto',
+						accept: 'application/grpc-web+proto',
 						'grpc-accept-encoding': 'identity',
 					},
 					body: framedBytes,
@@ -385,14 +382,14 @@ class GrpcClient {
 
 				const bodyBytes = new Uint8Array(await response.arrayBuffer());
 				const { messages, trailers } = parseGrpcWebFrames(bodyBytes);
-				
+
 				if (messages.length === 0) {
 					throw new GrpcError(502, 'No message received from gRPC upstream');
 				}
-				
+
 				const grpcStatus = Number.parseInt(trailers.get('grpc-status') ?? '0', 10);
 				const grpcMessage = trailers.get('grpc-message') ?? 'unknown';
-				
+
 				if (grpcStatus !== 0) {
 					throw new GrpcError(502, `gRPC status ${grpcStatus}: ${grpcMessage}`);
 				}
@@ -403,33 +400,32 @@ class GrpcClient {
 					enums: Number,
 					defaults: true, // Include default values to ensure empty arrays are returned
 				});
-				
+
 				const callDuration = Date.now() - callStartTime;
 				if (callDuration > 1000) {
 					console.warn(`Slow gRPC call: ${methodName} took ${callDuration}ms`);
 				}
-				
+
 				const result = convertEnumsToNames(obj);
-				
+
 				// Write to KV cache asynchronously in background
 				if (this.kv && this.ctx && this.isCacheable(methodName)) {
-					const ttl = this.getCacheTTL(methodName);
+					const ttl = this.getCacheTTL();
 					// Use ctx.waitUntil to run async KV write without blocking response
 					this.ctx.waitUntil(
-						this.kv.put(cacheKey, JSON.stringify(result), { expirationTtl: ttl })
-							.catch(error => {
-								console.warn(`KV cache write error for ${methodName}:`, error);
-							})
+						this.kv.put(cacheKey, JSON.stringify(result), { expirationTtl: ttl }).catch((error) => {
+							console.warn(`KV cache write error for ${methodName}:`, error);
+						})
 					);
 				}
-				
+
 				return result;
 			} finally {
 				clearTimeout(timeoutId);
 			}
 		} catch (error) {
 			const callDuration = Date.now() - callStartTime;
-			
+
 			// Handle timeout specifically
 			if (error instanceof Error && error.name === 'AbortError') {
 				console.error(`gRPC call timeout: ${methodName} after ${callDuration}ms`);
@@ -440,7 +436,7 @@ class GrpcClient {
 					},
 				});
 			}
-			
+
 			if (error instanceof GrpcError) {
 				console.error(`gRPC error in ${methodName}: ${error.publicMessage} (${callDuration}ms)`);
 				throw new GraphQLError(error.publicMessage, {
@@ -453,19 +449,18 @@ class GrpcClient {
 			throw error;
 		}
 	}
-	
+
 	private getCacheKey(methodName: string, payload: Record<string, unknown>): string {
 		// Create deterministic cache key from method name and payload
 		const sortedPayload = JSON.stringify(payload, Object.keys(payload).sort());
 		return `grpc:${methodName}:${sortedPayload}`;
 	}
-	
+
 	private isCacheable(methodName: string): boolean {
 		// Only cache read operations, not writes
 		const cacheableMethods = [
 			'GetStationById',
 			'GetStationByIdList',
-			'GetStationsByCoordinates',
 			'GetStationsByName',
 			'GetStationsByGroupId',
 			'GetStationsByLineId',
@@ -481,16 +476,10 @@ class GrpcClient {
 		];
 		return cacheableMethods.includes(methodName);
 	}
-	
-	private getCacheTTL(methodName: string): number {
-		// Cache TTLs in seconds
-		if (methodName === 'GetRoutes' || methodName === 'GetRoutesMinimal') {
-			return 3600; // 1 hour for routes
-		}
-		if (methodName.startsWith('GetStation') || methodName.startsWith('GetLine')) {
-			return 1800; // 30 minutes for station/line data
-		}
-		return 600; // 10 minutes for others
+
+	private getCacheTTL(): number {
+		// Cache TTL in seconds (6 hours) to balance freshness and upstream load
+		return 60 * 60 * 6;
 	}
 }
 
@@ -510,18 +499,17 @@ function resolveConfig(env: GatewayEnv): GatewayConfig {
 		const message = parseError instanceof Error ? parseError.message : 'unknown error';
 		throw new Error(`Invalid GRPC_TARGET_ORIGIN value: ${message}`);
 	}
-return {
-	targetOrigin,
-};
+	return {
+		targetOrigin,
+	};
 }
 
 function handlePreflight(request: Request, _config: GatewayConfig): Response {
 	const origin = request.headers.get('Origin');
 	const corsOrigin = origin ?? '*';
-	const requestedHeaders =
-		request.headers.get('Access-Control-Request-Headers') ?? DEFAULT_ALLOWED_HEADERS;
+	const requestedHeaders = request.headers.get('Access-Control-Request-Headers') ?? DEFAULT_ALLOWED_HEADERS;
 	const headers = new Headers();
-setCorsOrigin(headers, corsOrigin);
+	setCorsOrigin(headers, corsOrigin);
 	headers.set('Access-Control-Allow-Methods', 'POST, OPTIONS');
 	headers.set('Access-Control-Allow-Headers', requestedHeaders);
 	headers.set('Access-Control-Max-Age', '1800');
@@ -546,7 +534,7 @@ function buildGraphQLErrorResponse(
 	status: number,
 	message: string,
 	allowedOrigin: string | null,
-	additionalHeaders?: Iterable<[string, string]>,
+	additionalHeaders?: Iterable<[string, string]>
 ): Response {
 	const headers = new Headers();
 	headers.set('content-type', 'application/json; charset=utf-8');
@@ -576,17 +564,17 @@ function cleanPayload<T extends Record<string, unknown>>(payload: T): T {
 // Fetch full train type details for stations that have train types
 async function fetchFullTrainTypes(client: GrpcClient, payload: Record<string, any>): Promise<Map<number, any>> {
 	const routes = payload.routes;
-	
+
 	if (!routes || !Array.isArray(routes)) {
 		return new Map();
 	}
-	
+
 	// Collect station IDs that have train types (where train_type_id is set)
 	const stationIdsWithTrainTypes = new Set<number>();
 	for (let i = 0; i < routes.length; i++) {
 		const route = routes[i];
 		const stops = route.stops;
-		
+
 		if (stops && Array.isArray(stops)) {
 			for (let j = 0; j < stops.length; j++) {
 				const station = stops[j];
@@ -597,34 +585,31 @@ async function fetchFullTrainTypes(client: GrpcClient, payload: Record<string, a
 			}
 		}
 	}
-	
+
 	// Return empty map if no stations with train types
 	if (stationIdsWithTrainTypes.size === 0) {
 		return new Map();
 	}
-	
+
 	// Fetch train types for each station in parallel
 	const stationIdArray = Array.from(stationIdsWithTrainTypes);
-	const trainTypePromises = stationIdArray.map(stationId =>
-		client.call(
-			'GetTrainTypesByStationId',
-			grpcTypes.GetTrainTypesByStationIdRequest,
-			grpcTypes.MultipleTrainTypeResponse,
-			{ stationId },
-		).then(response => {
-			const trainTypes = response.trainTypes;
-			// Return the first train type (or find by ID if needed)
-			const trainType = trainTypes && Array.isArray(trainTypes) && trainTypes.length > 0 ? trainTypes[0] : null;
-			return { stationId, trainType };
-		})
-		.catch(error => {
-			console.warn(`Failed to fetch train type for station ${stationId}:`, error);
-			return { stationId, trainType: null };
-		})
+	const trainTypePromises = stationIdArray.map((stationId) =>
+		client
+			.call('GetTrainTypesByStationId', grpcTypes.GetTrainTypesByStationIdRequest, grpcTypes.MultipleTrainTypeResponse, { stationId })
+			.then((response) => {
+				const trainTypes = response.trainTypes;
+				// Return the first train type (or find by ID if needed)
+				const trainType = trainTypes && Array.isArray(trainTypes) && trainTypes.length > 0 ? trainTypes[0] : null;
+				return { stationId, trainType };
+			})
+			.catch((error) => {
+				console.warn(`Failed to fetch train type for station ${stationId}:`, error);
+				return { stationId, trainType: null };
+			})
 	);
-	
+
 	const trainTypeResults = await Promise.all(trainTypePromises);
-	
+
 	// Build map of station ID to TrainType object
 	const trainTypeMap = new Map<number, any>();
 	for (let i = 0; i < trainTypeResults.length; i++) {
@@ -633,22 +618,19 @@ async function fetchFullTrainTypes(client: GrpcClient, payload: Record<string, a
 			trainTypeMap.set(result.stationId, result.trainType);
 		}
 	}
-	
+
 	return trainTypeMap;
 }
 
 // Reconstruct full routes from minimal response using LineMinimal from the response
-function reconstructRoutesFromMinimal(
-	payload: Record<string, any>,
-	fullTrainTypeMap: Map<number, any>
-): any[] {
+function reconstructRoutesFromMinimal(payload: Record<string, any>, fullTrainTypeMap: Map<number, any>): any[] {
 	const routes = payload.routes;
 	const responseLines = payload.lines; // LineMinimal array from RouteMinimalResponse
-	
+
 	if (!routes || !Array.isArray(routes)) {
 		return [];
 	}
-	
+
 	// Build a map of line ID to LineMinimal for quick lookup
 	const lineMinimalMap = new Map<number, any>();
 	if (responseLines && Array.isArray(responseLines)) {
@@ -659,24 +641,24 @@ function reconstructRoutesFromMinimal(
 			}
 		}
 	}
-	
+
 	// Reconstruct routes with full station objects
 	const reconstructedRoutes = new Array(routes.length);
 	for (let i = 0; i < routes.length; i++) {
 		const route = routes[i];
 		const stops = route.stops;
-		
+
 		if (!stops || !Array.isArray(stops)) {
 			reconstructedRoutes[i] = { id: route.id, stops: [] };
 			continue;
 		}
-		
+
 		// Convert each StationMinimal to Station by resolving IDs to LineMinimal objects
 		const reconstructedStops = new Array(stops.length);
 		for (let j = 0; j < stops.length; j++) {
 			const minimalStation = stops[j];
 			const lineIds = minimalStation.lineIds;
-			
+
 			// Resolve line IDs to LineMinimal objects from the response
 			let stationLines: any[] = [];
 			if (lineIds && Array.isArray(lineIds)) {
@@ -690,12 +672,11 @@ function reconstructRoutesFromMinimal(
 				}
 				stationLines = resolvedLines;
 			}
-			
+
 			// Resolve train type from the map using station ID
-			const trainType = minimalStation.hasTrainTypes && typeof minimalStation.id === 'number'
-				? fullTrainTypeMap.get(minimalStation.id) ?? null
-				: null;
-			
+			const trainType =
+				minimalStation.hasTrainTypes && typeof minimalStation.id === 'number' ? fullTrainTypeMap.get(minimalStation.id) ?? null : null;
+
 			// Build full Station object matching the GraphQL schema
 			reconstructedStops[j] = {
 				id: minimalStation.id,
@@ -711,16 +692,15 @@ function reconstructRoutesFromMinimal(
 				trainType,
 			};
 		}
-		
+
 		reconstructedRoutes[i] = {
 			id: route.id,
 			stops: reconstructedStops,
 		};
 	}
-	
+
 	return reconstructedRoutes;
 }
-
 
 // Optimized enum conversion with early returns and minimal recursion
 // Uses memoization for repeated objects to avoid redundant processing
@@ -730,12 +710,12 @@ function convertEnumsToNames(obj: any): any {
 	if (obj === null || obj === undefined || typeof obj !== 'object') {
 		return obj;
 	}
-	
+
 	// Check cache for objects we've already processed
 	if (enumConversionCache.has(obj)) {
 		return enumConversionCache.get(obj);
 	}
-	
+
 	if (Array.isArray(obj)) {
 		// For arrays, process each item but don't cache the array itself
 		const result = new Array(obj.length);
@@ -744,13 +724,13 @@ function convertEnumsToNames(obj: any): any {
 		}
 		return result;
 	}
-	
+
 	const converted: any = {};
 	const entries = Object.entries(obj);
-	
+
 	for (let i = 0; i < entries.length; i++) {
 		const [key, value] = entries[i];
-		
+
 		// Skip null/undefined values early
 		if (value === null || value === undefined) {
 			converted[key] = value;
@@ -789,7 +769,7 @@ function convertEnumsToNames(obj: any): any {
 			converted[key] = value;
 		}
 	}
-	
+
 	// Cache the result for this object
 	enumConversionCache.set(obj, converted);
 	return converted;
@@ -809,24 +789,20 @@ function parseGrpcWebFrames(body: Uint8Array): { messages: Uint8Array[]; trailer
 	const trailers = new Map<string, string>();
 	let offset = 0;
 	const bodyLength = body.length;
-	
+
 	while (offset + 5 <= bodyLength) {
 		const flag = body[offset];
 		// Optimized length calculation using bit shifts
-		const length =
-			(body[offset + 1] << 24) |
-			(body[offset + 2] << 16) |
-			(body[offset + 3] << 8) |
-			body[offset + 4];
+		const length = (body[offset + 1] << 24) | (body[offset + 2] << 16) | (body[offset + 3] << 8) | body[offset + 4];
 		offset += 5;
-		
+
 		if (offset + length > bodyLength) {
 			break;
 		}
-		
+
 		const slice = body.subarray(offset, offset + length);
 		offset += length;
-		
+
 		if ((flag & 0x80) === 0x80) {
 			// Trailer frame - parse only if needed
 			const trailerString = new TextDecoder().decode(slice);

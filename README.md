@@ -30,6 +30,7 @@ npm run dev
 ## GraphQL Endpoint
 - GraphQL endpoint is exposed at `/graphql` (`POST` for queries, `GET` returns the SDL).
 - The runtime schema is declared in `schema.graphql` and mirrored in `src/graphqlGateway.ts`.
+- `POST` also accepts Apollo Client `BatchHttpLink` payloads such as `[{ query, variables, operationName }]`, returning results in the same order as received.
 - Supported queries include:
   - `station(id: Int!)` — Uses `GetStationById` RPC
   - `stations(ids: [Int!]!)` — Uses `GetStationByIdList` RPC
