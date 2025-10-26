@@ -96,9 +96,35 @@ type Station {
 	stopCondition: StopCondition
 	distance: Float
 	hasTrainTypes: Boolean
-	trainType: TrainType
-	lines: [Line!]
-	line: Line
+	trainType: TrainTypeNested
+	lines: [LineNested!]
+	line: LineNested
+}
+
+type StationNested {
+	id: Int
+	groupId: Int
+	name: String
+	nameKatakana: String
+	nameRoman: String
+	nameChinese: String
+	nameKorean: String
+	threeLetterCode: String
+	prefectureId: Int
+	postalCode: String
+	address: String
+	latitude: Float
+	longitude: Float
+	openedAt: String
+	closedAt: String
+	status: OperationStatus
+	stationNumbers: [StationNumber!]
+	stopCondition: StopCondition
+	distance: Float
+	hasTrainTypes: Boolean
+	trainType: TrainTypeNested
+	lines: [LineNested!]
+	line: LineNested
 }
 
 type StationNumber {
@@ -120,9 +146,27 @@ type Line {
 	lineType: LineType
 	lineSymbols: [LineSymbol!]
 	status: OperationStatus
-	station: Station
+	station: StationNested
 	company: Company
-	trainType: TrainType
+	trainType: TrainTypeNested
+	averageDistance: Float
+}
+
+type LineNested {
+	id: Int
+	nameShort: String
+	nameKatakana: String
+	nameFull: String
+	nameRoman: String
+	nameChinese: String
+	nameKorean: String
+	color: String
+	lineType: LineType
+	lineSymbols: [LineSymbol!]
+	status: OperationStatus
+	station: StationNested
+	company: Company
+	trainType: TrainTypeNested
 	averageDistance: Float
 }
 
@@ -156,13 +200,29 @@ type TrainType {
 	nameChinese: String
 	nameKorean: String
 	color: String
-	lines: [Line!]
-	line: Line
+	lines: [LineNested!]
+	line: LineNested
+	direction: TrainDirection
+	kind: TrainTypeKind
+}
+
+type TrainTypeNested {
+	id: Int
+	typeId: Int
+	groupId: Int
+	name: String
+	nameKatakana: String
+	nameRoman: String
+	nameChinese: String
+	nameKorean: String
+	color: String
+	lines: [LineNested!]
+	line: LineNested
 	direction: TrainDirection
 	kind: TrainTypeKind
 }
 
 type Route {
 	id: Int
-	stops: [Station!]
+	stops: [StationNested!]
 }
