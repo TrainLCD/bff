@@ -4,7 +4,7 @@
  */
 {
 	"$schema": "node_modules/wrangler/config-schema.json",
-	"name": "sapi-bff",
+	"name": "sapi-bff-stg",
 	"main": "src/index.ts",
 	"compatibility_date": "2025-10-11",
 	"observability": {
