@@ -1,8 +1,11 @@
-# sapi-bff
+# BFF
+
+![Billboard](.github/images/billboard.png)
 
 Cloudflare Workers-based backend-for-frontend (BFF) that exposes a GraphQL API backed by the upstream gRPC-Web service defined by `GRPC_TARGET_ORIGIN`. GraphQL resolvers translate queries into protobuf payloads generated from `proto/stationapi.proto`, forward them via gRPC-Web, and map responses back into the GraphQL schema. Development, testing, and deployment rely on Wrangler v4 and Vitest.
 
 ## Prerequisites
+
 - Node.js 18 or later
 - npm, pnpm, or another Node.js package manager
 - Cloudflare account (required for deployment)
@@ -10,24 +13,29 @@ Cloudflare Workers-based backend-for-frontend (BFF) that exposes a GraphQL API b
 Wrangler is bundled as a devDependency, so `npx wrangler` works without a global install.
 
 ## Setup
+
 ```bash
 npm install
 ```
 
 ## Environment Variables
+
 - `GRPC_TARGET_ORIGIN` (required): Origin of the upstream gRPC-Web endpoint, for example `https://grpc.example.com`. The worker returns HTTP 500 if this value is missing or invalid.
 - `GRPC_ALLOWED_ORIGINS` (optional): Comma-separated list of origins allowed via CORS. Omit to allow all origins.
 
 For local development set these in `.dev.vars` or the `vars` section of `wrangler.jsonc`. Configure environment-specific values before deploying.
 
 ## Local Development
+
 ```bash
 npm run dev
 ```
+
 - Runs `wrangler dev` and exposes the worker at `http://localhost:8787/`.
 - The `compatibility_date` is `2025-10-11`; update it when adopting newer runtime capabilities.
 
 ## GraphQL Endpoint
+
 - GraphQL endpoint is exposed at `/graphql` (`POST` for queries, `GET` returns the SDL).
 - The runtime schema is declared in `schema.graphql` and mirrored in `src/graphqlGateway.ts`.
 - `POST` also accepts Apollo Client `BatchHttpLink` payloads such as `[{ query, variables, operationName }]`, returning results in the same order as received.
@@ -51,48 +59,58 @@ The `routes` query uses the `GetRoutesMinimal` RPC which returns normalized/dedu
 Customize or extend the schema by editing `schema.graphql` and updating the resolvers in `src/graphqlGateway.ts`.
 
 ### Example Query
+
 ```graphql
 query Example($from: Int!, $to: Int!) {
-  routes(fromStationGroupId: $from, toStationGroupId: $to, pageSize: 10) {
-    routes {
-      id
-      stops {
-        id
-        name
-      }
-    }
-    nextPageToken
-  }
+	routes(fromStationGroupId: $from, toStationGroupId: $to, pageSize: 10) {
+		routes {
+			id
+			stops {
+				id
+				name
+			}
+		}
+		nextPageToken
+	}
 }
 ```
 
 ## Testing
+
 ```bash
 npm test
 ```
+
 - Uses `cloudflare/test` and `@cloudflare/vitest-pool-workers` to exercise the Worker in a production-like environment, including gRPC-Web framing, CORS handling, and GraphQL execution.
 
 ## Deployment
+
 ```bash
 npm run deploy
 ```
+
 - Run `npx wrangler login` the first time to authenticate with Cloudflare.
 - Ensure `GRPC_TARGET_ORIGIN`, `GRPC_ALLOWED_ORIGINS`, and any additional bindings are defined for the target environment prior to deployment.
 
 ## Regenerating Type Definitions
+
 ```bash
 npm run cf-typegen
 ```
+
 - Wrangler refreshes `worker-configuration.d.ts` so the `Env` types stay aligned with your bindings.
 
 ## Updating gRPC Stubs
+
 ```bash
 npm run proto:generate
 ```
+
 - Compiles `proto/stationapi.proto` to `src/generated/stationapi.js` and `src/generated/stationapi.d.ts` using `protobufjs`.
 - Re-run tests afterwards to ensure the GraphQL↔gRPC translations still behave as expected.
 
 ## Directory Highlights
+
 - `src/index.ts` — Worker entry point delegating requests to the GraphQL gateway.
 - `src/graphqlGateway.ts` — GraphQL schema/resolver wiring, CORS handling, and gRPC-Web invocation helpers.
 - `src/generated/stationapi.js` — ProtobufJS static module generated from `proto/stationapi.proto`.
@@ -103,4 +121,5 @@ npm run proto:generate
 - `wrangler.jsonc` — Worker metadata, compatibility date, and development/deployment settings.
 
 ## License
+
 This project is released under the [MIT License](LICENSE).
